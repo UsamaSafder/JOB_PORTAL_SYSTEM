@@ -1,0 +1,176 @@
+<div class="job-details-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading job details...</p>
+  </div>
+
+  <!-- Job Details -->
+  <div *ngIf="!loading && job" class="content-wrapper">
+    <!-- Back Button -->
+    <button (click)="goBack()" class="btn-back">
+      ← Back to Jobs
+    </button>
+
+    <!-- Job Header Card -->
+    <div class="job-header-card">
+      <div class="header-content">
+        <div class="company-logo-large">{{ job.companyName?.charAt(0) }}</div>
+        <div class="header-info">
+          <h1>{{ job.title }}</h1>
+          <h2>{{ job.companyName }}</h2>
+          <div class="header-details">
+            <span class="detail-badge">📍 {{ job.location }}</span>
+            <span class="detail-badge">💼 {{ job.employmentType }}</span>
+            <span class="detail-badge">💰 {{ job.salaryRange || 'Not specified' }}</span>
+            <span class="detail-badge">📅 Posted {{ job.postedAt | date: 'MMM d, y' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button 
+          *ngIf="!hasApplied" 
+          (click)="applyForJob()" 
+          [disabled]="applying"
+          class="btn-apply"
+        >
+          {{ applying ? 'Submitting...' : 'Apply Now' }}
+        </button>
+        <button *ngIf="hasApplied" class="btn-applied" disabled>
+          ✓ Already Applied
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+      <!-- Left Column -->
+      <div class="left-column">
+        <!-- Job Description -->
+        <div class="section-card">
+          <h3>Job Description</h3>
+          <p class="description-text">{{ job.description }}</p>
+        </div>
+
+        <!-- Requirements -->
+        <div class="section-card">
+          <h3>Requirements</h3>
+          <ul class="requirements-list">
+            <li *ngFor="let requirement of (job.requirements ? job.requirements.split(',') : [])">
+              <span class="check-icon">✓</span>
+              {{ requirement.trim() }}
+            </li>
+          </ul>
+        </div>
+
+        <!-- Responsibilities -->
+        <div class="section-card">
+          <h3>Responsibilities</h3>
+          <ul class="requirements-list">
+            <li>Design and implement scalable software solutions</li>
+            <li>Collaborate with cross-functional teams</li>
+            <li>Write clean, maintainable code</li>
+            <li>Participate in code reviews</li>
+            <li>Mentor junior developers</li>
+          </ul>
+        </div>
+
+        <!-- Benefits -->
+        <div class="section-card">
+          <h3>Benefits & Perks</h3>
+          <div class="benefits-grid">
+            <div class="benefit-item">
+              <span class="benefit-icon">🏥</span>
+              <span>Health Insurance</span>
+            </div>
+            <div class="benefit-item">
+              <span class="benefit-icon">🏖️</span>
+              <span>Paid Time Off</span>
+            </div>
+            <div class="benefit-item">
+              <span class="benefit-icon">💻</span>
+              <span>Remote Work</span>
+            </div>
+            <div class="benefit-item">
+              <span class="benefit-icon">📚</span>
+              <span>Learning Budget</span>
+            </div>
+            <div class="benefit-item">
+              <span class="benefit-icon">🏋️</span>
+              <span>Gym Membership</span>
+            </div>
+            <div class="benefit-item">
+              <span class="benefit-icon">🍕</span>
+              <span>Free Meals</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="right-column">
+        <!-- Quick Apply Card -->
+        <div class="sticky-card apply-card">
+          <h3>Ready to Apply?</h3>
+          <p>Join {{ job.companyName }} and advance your career</p>
+          <button 
+            *ngIf="!hasApplied" 
+            (click)="applyForJob()" 
+            [disabled]="applying"
+            class="btn-apply-full"
+          >
+            {{ applying ? 'Submitting...' : 'Apply for this Position' }}
+          </button>
+          <button *ngIf="hasApplied" class="btn-applied-full" disabled>
+            ✓ Application Submitted
+          </button>
+        </div>
+
+        <!-- Job Info Card -->
+        <div class="sticky-card info-card">
+          <h3>Job Information</h3>
+          <div class="info-list">
+            <div class="info-item">
+              <span class="info-label">Job Type:</span>
+              <span class="info-value">{{ job.employmentType }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Location:</span>
+              <span class="info-value">{{ job.location }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Salary Range:</span>
+              <span class="info-value">{{ job.salaryRange || 'Not specified' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Experience:</span>
+              <span class="info-value">3-5 years</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Deadline:</span>
+              <span class="info-value">{{ job.deadline | date: 'MMM d, y' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Share Card -->
+        <div class="sticky-card share-card">
+          <h3>Share this Job</h3>
+          <div class="share-buttons">
+            <button class="share-btn linkedin">LinkedIn</button>
+            <button class="share-btn twitter">Twitter</button>
+            <button class="share-btn email">Email</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!loading && !job" class="error-state">
+    <h3>Job Not Found</h3>
+    <p>The job you're looking for doesn't exist or has been removed.</p>
+    <button (click)="goBack()" class="btn-primary">Browse Jobs</button>
+  </div>
+</div>

@@ -1,0 +1,23 @@
+{
+  "name": "job-portal-system",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "npm --prefix src/react run dev",
+    "start:react": "npm --prefix src/react run dev",
+    "backend": "npm --prefix Backend start",
+    "start:all": "concurrently \"npm:backend\" \"npm:start\"",
+    "start:all:react": "concurrently \"npm:backend\" \"npm:start:react\"",
+    "build": "npm --prefix src/react run build",
+    "build:react": "npm --prefix src/react run build",
+    "watch": "npm --prefix src/react run dev",
+    "test": "npm --prefix src/react run build"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true
+  },
+  "private": true,
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

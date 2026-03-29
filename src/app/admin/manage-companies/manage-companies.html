@@ -1,0 +1,203 @@
+ <div class="manage-companies">
+      <div class="header">
+        <h2>Manage Companies</h2>
+        <div class="search-filter">
+          <input 
+            type="text" 
+            [(ngModel)]="searchTerm" 
+            (input)="filterCompanies()"
+            placeholder="Search by name, industry, or location..."
+            class="search-input"
+          />
+          <select [(ngModel)]="filterVerified" (change)="filterCompanies()" class="filter-select">
+            <option value="all">All Companies</option>
+            <option value="verified">Verified Only</option>
+            <option value="unverified">Unverified Only</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stats-cards">
+        <div class="stat-card total">
+          <h3>Total Companies</h3>
+          <p class="stat-number">{{ companies.length }}</p>
+        </div>
+        <div class="stat-card verified">
+          <h3>Verified Companies</h3>
+          <p class="stat-number">{{ getVerifiedCompanies() }}</p>
+        </div>
+        <div class="stat-card pending">
+          <h3>Pending Verification</h3>
+          <p class="stat-number">{{ getUnverifiedCompanies() }}</p>
+        </div>
+        <div class="stat-card active">
+          <h3>Active Companies</h3>
+          <p class="stat-number">{{ getActiveCompanies() }}</p>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="companies-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Company Name</th>
+              <th>Email</th>
+              <th>Industry</th>
+              <th>Location</th>
+              <th>Jobs Posted</th>
+              <th>Verified</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let company of filteredCompanies">
+              <td>{{ company.companyID }}</td>
+              <td>
+                <div class="company-info">
+                  <strong>{{ company.companyName }}</strong>
+                </div>
+              </td>
+              <td>{{ company.email }}</td>
+              <td>
+                <span class="industry-badge">{{ company.industry }}</span>
+              </td>
+              <td>{{ company.location }}</td>
+              <td class="text-center">{{ company.jobsPosted || 0 }}</td>
+              <td>
+                <span [class]="'verify-badge ' + (company.isVerified ? 'verified' : 'unverified')">
+                  {{ company.isVerified ? '✓ Verified' : '⏳ Pending' }}
+                </span>
+              </td>
+              <td>
+                <span [class]="'status-badge ' + (company.isActive ? 'active' : 'inactive')">
+                  {{ company.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td class="actions">
+                <button (click)="viewCompany(company)" class="btn-view" title="View Details">
+                  <i class="icon">👁️</i>
+                </button>
+                <button 
+                  *ngIf="!company.isVerified"
+                  (click)="verifyCompany(company)" 
+                  class="btn-verify" 
+                  title="Verify Company"
+                >
+                  <i class="icon">✓</i>
+                </button>
+                <button 
+                  (click)="toggleStatus(company)" 
+                  [class]="'btn-toggle ' + (company.isActive ? 'deactivate' : 'activate')"
+                  [title]="company.isActive ? 'Deactivate' : 'Activate'"
+                >
+                  <i class="icon">{{ company.isActive ? '🔒' : '✓' }}</i>
+                </button>
+                <button (click)="deleteCompany(company)" class="btn-delete" title="Delete">
+                  <i class="icon">🗑️</i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="filteredCompanies.length === 0" class="no-data">
+          <p>No companies found matching your criteria.</p>
+        </div>
+      </div>
+
+      <!-- View Details Modal -->
+      <div *ngIf="selectedCompany" class="modal-overlay" (click)="closeModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Company Details</h3>
+            <button class="close-btn" (click)="closeModal()">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="detail-section">
+              <h4>Basic Information</h4>
+              <div class="detail-row">
+                <span class="label">Company Name:</span>
+                <span class="value">{{ selectedCompany.companyName }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Email:</span>
+                <span class="value">{{ selectedCompany.email }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Phone:</span>
+                <span class="value">{{ selectedCompany.phoneNumber }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Industry:</span>
+                <span class="value">
+                  <span class="industry-badge">{{ selectedCompany.industry }}</span>
+                </span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Location:</span>
+                <span class="value">{{ selectedCompany.location }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Website:</span>
+                <span class="value">
+                  <a [href]="'https://' + selectedCompany.website" target="_blank" class="website-link">
+                    {{ selectedCompany.website }}
+                  </a>
+                </span>
+              </div>
+            </div>
+
+            <div class="detail-section">
+              <h4>Company Description</h4>
+              <p class="description">{{ selectedCompany.description }}</p>
+            </div>
+
+            <div class="detail-section">
+              <h4>Status Information</h4>
+              <div class="detail-row">
+                <span class="label">Verification Status:</span>
+                <span class="value">
+                  <span [class]="'verify-badge ' + (selectedCompany.isVerified ? 'verified' : 'unverified')">
+                    {{ selectedCompany.isVerified ? '✓ Verified' : '⏳ Pending Verification' }}
+                  </span>
+                </span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Account Status:</span>
+                <span class="value">
+                  <span [class]="'status-badge ' + (selectedCompany.isActive ? 'active' : 'inactive')">
+                    {{ selectedCompany.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Jobs Posted:</span>
+                <span class="value">{{ selectedCompany.jobsPosted || 0 }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Registered:</span>
+                <span class="value">{{ selectedCompany.createdAt | date:'medium' }}</span>
+              </div>
+            </div>
+
+            <div class="modal-actions">
+              <button 
+                *ngIf="!selectedCompany.isVerified"
+                (click)="verifyCompany(selectedCompany)" 
+                class="btn-action verify"
+              >
+                Verify Company
+              </button>
+              <button 
+                (click)="toggleStatus(selectedCompany)" 
+                [class]="'btn-action ' + (selectedCompany.isActive ? 'deactivate' : 'activate')"
+              >
+                {{ selectedCompany.isActive ? 'Deactivate' : 'Activate' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>

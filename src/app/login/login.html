@@ -1,0 +1,148 @@
+<!-- Login Container -->
+<div class="login-wrapper">
+  <!-- Left Side - Branding -->
+  <div class="login-brand">
+    <div class="brand-content">
+      <h1 (click)="navigateToHome()" style="cursor: pointer;">🚀 JobPortal</h1>
+      <p class="brand-tagline">Your Gateway to Career Success</p>
+      <div class="brand-features">
+        <div class="brand-feature">
+          <span class="check-icon">✓</span>
+          <span>Connect with Top Companies</span>
+        </div>
+        <div class="brand-feature">
+          <span class="check-icon">✓</span>
+          <span>Track Your Applications</span>
+        </div>
+        <div class="brand-feature">
+          <span class="check-icon">✓</span>
+          <span>Get Hired Faster</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side - Login Form -->
+  <div class="login-container">
+    <div class="login-box">
+      <!-- Header -->
+      <div class="login-header">
+        <h2>Welcome Back!</h2>
+        <p>Sign in to continue to your account</p>
+      </div>
+
+      <!-- User Type Selection -->
+      <div class="user-type-selector">
+        <button 
+          class="user-type-btn"
+          [class.active]="selectedUserType === 'candidate'"
+          (click)="selectUserType('candidate')">
+          <span class="icon">👤</span>
+          <span>Candidate</span>
+        </button>
+        <button 
+          class="user-type-btn"
+          [class.active]="selectedUserType === 'company'"
+          (click)="selectUserType('company')">
+          <span class="icon">🏢</span>
+          <span>Company</span>
+        </button>
+        <button 
+          class="user-type-btn"
+          [class.active]="selectedUserType === 'admin'"
+          (click)="selectUserType('admin')">
+          <span class="icon">⚙️</span>
+          <span>Admin</span>
+        </button>
+      </div>
+
+      <!-- Login Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Email Field -->
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <div class="input-wrapper">
+            <span class="input-icon">📧</span>
+            <input 
+              type="email" 
+              id="email"
+              formControlName="email"
+              placeholder="Enter your email"
+              [class.error]="email?.invalid && email?.touched">
+          </div>
+          <div class="error-message" *ngIf="email?.invalid && email?.touched">
+            <span *ngIf="email?.errors?.['required']">Email is required</span>
+            <span *ngIf="email?.errors?.['email']">Please enter a valid email</span>
+          </div>
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input 
+              [type]="showPassword ? 'text' : 'password'" 
+              id="password"
+              formControlName="password"
+              placeholder="Enter your password"
+              [class.error]="password?.invalid && password?.touched">
+            <button 
+              type="button" 
+              class="toggle-password"
+              (click)="togglePasswordVisibility()">
+              {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+            </button>
+          </div>
+          <div class="error-message" *ngIf="password?.invalid && password?.touched">
+            <span *ngIf="password?.errors?.['required']">Password is required</span>
+            <span *ngIf="password?.errors?.['minlength']">Password must be at least 6 characters</span>
+          </div>
+        </div>
+
+        <!-- Remember Me & Forgot Password -->
+        <div class="form-options">
+          <label class="checkbox-label">
+            <input type="checkbox">
+            <span>Remember me</span>
+          </label>
+          <a href="#" class="forgot-link">Forgot Password?</a>
+        </div>
+
+        <!-- Error Message -->
+        <div class="alert alert-error" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          class="btn-submit"
+          [disabled]="isLoading">
+          <span *ngIf="!isLoading">Sign In</span>
+          <span *ngIf="isLoading" class="loading-spinner">
+            <span class="spinner"></span> Signing in...
+          </span>
+        </button>
+      </form>
+
+      <!-- Register Link -->
+      <div class="register-link">
+        <p>Don't have an account? 
+          <a (click)="navigateToRegister()">Create Account</a>
+        </p>
+      </div>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>OR</span>
+      </div>
+
+      <!-- Back to Home -->
+      <button class="btn-back" (click)="navigateToHome()">
+        ← Back to Home
+      </button>
+    </div>
+  </div>
+</div>

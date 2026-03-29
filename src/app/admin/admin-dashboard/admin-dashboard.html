@@ -1,0 +1,158 @@
+<div class="admin-dashboard">
+  <!-- Header Section -->
+  <div class="header">
+    <div class="header-left">
+      <h2>📊 Admin Dashboard</h2>
+      <p class="subtitle">Monitor your job portal system</p>
+    </div>
+    <div class="search-filter">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (input)="filterActivities()"
+        placeholder="🔍 Search activities..."
+        class="search-input"
+      />
+      <button class="refresh-btn" (click)="loadDashboardData()">🔄 Refresh</button>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-cards">
+    <div class="stat-card companies">
+      <div class="stat-icon">🏢</div>
+      <div class="stat-content">
+        <p class="stat-label">Total Companies</p>
+        <p class="stat-value">{{ statsData?.totalCompanies || 0 }}</p>
+      </div>
+    </div>
+    <div class="stat-card candidates">
+      <div class="stat-icon">👥</div>
+      <div class="stat-content">
+        <p class="stat-label">Total Candidates</p>
+        <p class="stat-value">{{ statsData?.totalCandidates || 0 }}</p>
+      </div>
+    </div>
+    <div class="stat-card jobs">
+      <div class="stat-icon">💼</div>
+      <div class="stat-content">
+        <p class="stat-label">Active Jobs</p>
+        <p class="stat-value">{{ statsData?.activeJobs || 0 }}</p>
+      </div>
+    </div>
+    <div class="stat-card applications">
+      <div class="stat-icon">📋</div>
+      <div class="stat-content">
+        <p class="stat-label">Total Applications</p>
+        <p class="stat-value">{{ statsData?.totalApplications || 0 }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions Grid -->
+  <div class="quick-actions-section">
+    <h3>⚡ Quick Actions</h3>
+    <div class="quick-actions-grid">
+      <div class="action-card companies" (click)="navigateTo('/admin/companies')">
+        <span class="action-icon">🏢</span>
+        <h4>Manage Companies</h4>
+        <p>Review & verify companies</p>
+      </div>
+      <div class="action-card candidates" (click)="navigateTo('/admin/candidates')">
+        <span class="action-icon">👥</span>
+        <h4>Manage Candidates</h4>
+        <p>View all job seekers</p>
+      </div>
+      <div class="action-card jobs" (click)="navigateTo('/admin/jobs')">
+        <span class="action-icon">💼</span>
+        <h4>Manage Jobs</h4>
+        <p>Monitor job postings</p>
+      </div>
+      <div class="action-card logs" (click)="navigateTo('/admin/logs')">
+        <span class="action-icon">📋</span>
+        <h4>System Logs</h4>
+        <p>View system activities</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activities Table -->
+  <div class="table-container">
+    <div class="table-header">
+      <h3>📊 Recent Activities</h3>
+      <button class="view-all-btn" (click)="navigateTo('/admin/logs')">View All →</button>
+    </div>
+    
+    <table class="dashboard-table" *ngIf="filteredActivities.length > 0">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Action</th>
+          <th>Type</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let activity of filteredActivities">
+          <td><strong>{{ activity.userName }}</strong></td>
+          <td>{{ activity.action }}</td>
+          <td>
+            <span class="type-badge" [ngClass]="'type-' + (activity.userType || 'system')">
+              {{ activity.userType || 'System' }}
+            </span>
+          </td>
+          <td><span class="timestamp">{{ formatDate(activity.timestamp) }}</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="filteredActivities.length === 0">
+      <p>📭 No activities found</p>
+    </div>
+  </div>
+
+  <!-- Pending Verifications Section -->
+  <div class="table-container pending-section">
+    <div class="table-header">
+      <h3>⏳ Pending Company Verifications</h3>
+      <span class="pending-badge" *ngIf="pendingVerifications.length > 0">{{ pendingVerifications.length }} pending</span>
+    </div>
+    
+    <table class="dashboard-table" *ngIf="pendingVerifications.length > 0">
+      <thead>
+        <tr>
+          <th>Company Name</th>
+          <th>Email</th>
+          <th>Industry</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let company of pendingVerifications">
+          <td><strong>{{ company.companyName }}</strong></td>
+          <td>{{ company.email }}</td>
+          <td><span class="industry-badge">{{ company.industry }}</span></td>
+          <td>
+            <span class="status-badge pending">⏳ Pending</span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-verify" (click)="verifyCompany(company.companyID)" title="Verify this company">
+                ✓ Verify
+              </button>
+              <button class="btn-reject" (click)="rejectCompany(company.companyID)" title="Reject this company">
+                ✗ Reject
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state success" *ngIf="pendingVerifications.length === 0">
+      <p>✅ All companies are verified!</p>
+    </div>
+  </div>
+
+</div>

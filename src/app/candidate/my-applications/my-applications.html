@@ -1,0 +1,97 @@
+<div class="applications-container">
+  <div class="page-header">
+    <h2>My Applications</h2>
+    <p>Track and manage your job applications</p>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="filter-section">
+    <div class="filter-group">
+      <label for="statusFilter">Filter by Status:</label>
+      <select 
+        id="statusFilter"
+        [(ngModel)]="selectedStatus" 
+        (change)="filterByStatus()" 
+        class="filter-select"
+      >
+        <option *ngFor="let status of statusOptions" [value]="status === 'All' ? '' : status">
+          {{ status }}
+        </option>
+      </select>
+    </div>
+
+    <div class="results-count">
+      Showing {{ filteredApplications.length }} of {{ applications.length }} applications
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading applications...</p>
+  </div>
+
+  <!-- Applications List -->
+  <div *ngIf="!loading && filteredApplications.length > 0" class="applications-list">
+    <div *ngFor="let application of filteredApplications" class="application-card">
+      <div class="card-header">
+        <div class="company-logo">{{ application.companyName?.charAt(0) }}</div>
+        <div class="job-info">
+          <h3>{{ application.jobTitle }}</h3>
+          <p class="company-name">{{ application.companyName }}</p>
+        </div>
+        <span [ngClass]="['status-badge', getStatusClass(application.status)]">
+          {{ getStatusIcon(application.status) }} {{ application.status }}
+        </span>
+      </div>
+
+      <div class="card-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">📅 Applied Date:</span>
+            <span class="info-value">{{ application.appliedAt | date: 'MMM d, y' }}</span>
+          </div>
+          <div class="info-item" *ngIf="application.interviewDate">
+            <span class="info-label">🗓️ Interview Date:</span>
+            <span class="info-value">{{ application.interviewDate | date: 'MMM d, y h:mm a' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">📍 Location:</span>
+            <span class="info-value">Remote</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">💼 Job Type:</span>
+            <span class="info-value">Full-time</span>
+          </div>
+        </div>
+
+        <div *ngIf="application.feedback" class="feedback-section">
+          <h4>Feedback:</h4>
+          <p>{{ application.feedback }}</p>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <a [routerLink]="['/candidate/job-details', application.jobId]" class="btn-view">
+          View Job Details
+        </a>
+        <button 
+          *ngIf="(application.status === 'Pending' || application.status === 'Reviewed') && application.applicationId"
+          (click)="withdrawApplication(application.applicationId)"
+          class="btn-withdraw"
+        >
+          Withdraw
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && filteredApplications.length === 0" class="empty-state">
+    <div class="empty-icon">📄</div>
+    <h3>No Applications Found</h3>
+    <p *ngIf="selectedStatus">No applications with status "{{ selectedStatus }}"</p>
+    <p *ngIf="!selectedStatus">You haven't applied to any jobs yet</p>
+    <a routerLink="/candidate/browse-jobs" class="btn-primary">Browse Jobs</a>
+  </div>
+</div>

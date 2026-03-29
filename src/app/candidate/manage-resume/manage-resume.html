@@ -1,0 +1,52 @@
+<div class="resume-container">
+      <div class="page-header">
+        <h2>Manage Resumes</h2>
+        <p>Upload and manage your resume files</p>
+      </div>
+
+      <!-- Upload Section -->
+      <div class="upload-section">
+        <div class="upload-area" (click)="openFilePicker()" (dragover)="onDragOver($event)" 
+             (drop)="onDrop($event)">
+          <div class="upload-icon">📄</div>
+          <h3>Upload Resume</h3>
+          <p>Drag and drop your resume here or click to browse</p>
+          <p class="file-info">Supported formats: PDF, DOC, DOCX (Max 5MB)</p>
+        </div>
+        <div *ngIf="uploading" class="upload-progress">
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+          <p>Uploading...</p>
+        </div>
+      </div>
+
+      <!-- Resumes List -->
+      <div class="resumes-section">
+        <h3>Your Resumes</h3>
+        <div *ngIf="loading" class="loading">Loading resumes...</div>
+        
+        <div *ngIf="!loading && resumes.length === 0" class="empty-state">
+          <p>No resumes uploaded yet</p>
+        </div>
+
+        <div *ngIf="!loading && resumes.length > 0" class="resumes-list">
+          <div *ngFor="let resume of resumes" class="resume-card">
+            <div class="resume-icon">📄</div>
+            <div class="resume-info">
+              <h4>{{ resume.fileName }}</h4>
+              <p class="resume-meta">
+                <span>{{ formatFileSize(resume.fileSize) }}</span> • 
+                <span>Uploaded {{ resume.uploadedAt | date: 'MMM d, y' }}</span>
+              </p>
+              <span *ngIf="resume.isActive" class="active-badge">✓ Active Resume</span>
+            </div>
+            <div class="resume-actions">
+              <button (click)="downloadResume(resume.fileUrl || resume.fileUrl)" class="btn-action">Download</button>
+              <button *ngIf="!resume.isActive" (click)="setActive(resume.id)" class="btn-action">
+                Set as Active
+              </button>
+              <button (click)="deleteResume(resume.id)" class="btn-delete">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>

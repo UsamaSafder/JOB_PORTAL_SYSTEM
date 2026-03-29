@@ -1,0 +1,217 @@
+<div class="details-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading application details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!loading && errorMessage" class="error-container">
+    <div class="error-box">
+      <h2>❌ Error</h2>
+      <p>{{ errorMessage }}</p>
+      <button class="btn-back" (click)="goBack()">
+        ← Back to Applications
+      </button>
+    </div>
+  </div>
+
+  <!-- Application Details -->
+  <div *ngIf="!loading && !errorMessage && application">
+    <!-- Header -->
+    <div class="details-header">
+      <button class="btn-back" (click)="goBack()">
+        ← Back to Applications
+      </button>
+      <h1>Application Details</h1>
+    </div>
+
+    <!-- Status Card -->
+    <div class="status-card">
+      <div class="status-info">
+        <span class="status-label">Current Status:</span>
+        <span [class]="'status-badge ' + getStatusClass(application.status)">
+          {{ application.status }}
+        </span>
+      </div>
+      
+      <div class="status-actions" *ngIf="application.status !== 'Rejected'">
+        <button
+          *ngIf="application.status === 'Pending'"
+          class="btn-status"
+          (click)="updateStatus('Reviewed')"
+        >
+          Mark as Reviewed
+        </button>
+        <button
+          *ngIf="application.status === 'Reviewed'"
+          class="btn-status btn-accept"
+          (click)="updateStatus('Accepted')"
+        >
+          Accept Application
+        </button>
+        <button
+          *ngIf="application.status === 'Reviewed'"
+          class="btn-status btn-reject"
+          (click)="updateStatus('Rejected')"
+        >
+          Reject Application
+        </button>
+        <button
+          *ngIf="application.status === 'Accepted' && !interview"
+          class="btn-status btn-interview"
+          (click)="scheduleInterview()"
+        >
+          📅 Schedule Interview
+        </button>
+      </div>
+    </div>
+
+    <!-- Interview Info (if scheduled) -->
+    <div *ngIf="interview" class="interview-card">
+      <h3>📅 Interview Scheduled</h3>
+      <div class="interview-details">
+        <div class="interview-item">
+          <span class="interview-label">Date & Time:</span>
+          <span class="interview-value">{{ interview.scheduledDate | date: 'full' }}</span>
+        </div>
+        <div class="interview-item">
+          <span class="interview-label">Mode:</span>
+          <span class="interview-value">{{ interview.mode }}</span>
+        </div>
+        <div class="interview-item" *ngIf="interview.location">
+          <span class="interview-label">Location:</span>
+          <span class="interview-value">{{ interview.location }}</span>
+        </div>
+        <div class="interview-item">
+          <span class="interview-label">Status:</span>
+          <span class="interview-value">{{ interview.status }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+      <!-- Candidate Information -->
+      <div class="info-card">
+        <h2>👤 Candidate Information</h2>
+        <div class="candidate-header">
+          <div class="candidate-avatar-large">
+            {{ application.candidateName?.charAt(0) }}
+          </div>
+          <div>
+            <h3>{{ application.candidateName }}</h3>
+            <p class="candidate-subtitle">{{ application.experienceYears }} years of experience</p>
+          </div>
+        </div>
+        
+        <div class="info-section">
+          <div class="info-item">
+            <span class="info-icon">📧</span>
+            <div>
+              <div class="info-label">Email</div>
+              <div class="info-value">
+                <a href="mailto:{{ application.candidateEmail }}">{{ application.candidateEmail }}</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-item" *ngIf="application.candidatePhone">
+            <span class="info-icon">📱</span>
+            <div>
+              <div class="info-label">Phone</div>
+              <div class="info-value">
+                <a href="tel:{{ application.candidatePhone }}">{{ application.candidatePhone }}</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <span class="info-icon">💼</span>
+            <div>
+              <div class="info-label">Experience</div>
+              <div class="info-value">{{ application.experienceYears }} years</div>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <span class="info-icon">📅</span>
+            <div>
+              <div class="info-label">Applied On</div>
+              <div class="info-value">{{ application.appliedAt | date: 'MMM d, y h:mm a' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resume Section -->
+        <div class="resume-section" *ngIf="application.resumeLink">
+          <button class="btn-resume" (click)="downloadResume()">
+            📄 Download Resume
+          </button>
+        </div>
+      </div>
+
+      <!-- Job Information -->
+      <div class="info-card">
+        <h2>💼 Job Information</h2>
+        <div class="info-section">
+          <div class="info-item">
+            <span class="info-icon">🎯</span>
+            <div>
+              <div class="info-label">Job Title</div>
+              <div class="info-value">{{ application.jobTitle }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills Section -->
+    <div class="info-card full-width">
+      <h2>🛠️ Skills & Expertise</h2>
+      <div class="skills-container" *ngIf="application.candidateSkills">
+        <span
+          *ngFor="let skill of application.candidateSkills.split(',')"
+          class="skill-tag"
+        >
+          {{ skill.trim() }}
+        </span>
+      </div>
+      <p *ngIf="!application.candidateSkills" class="no-data">No skills listed</p>
+    </div>
+
+    <!-- Cover Letter -->
+    <div class="info-card full-width">
+      <h2>✉️ Cover Letter</h2>
+      <div class="cover-letter" *ngIf="application.coverLetter">
+        <p>{{ application.coverLetter }}</p>
+      </div>
+      <p *ngIf="!application.coverLetter" class="no-data">No cover letter provided</p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button
+        class="btn-action btn-email"
+        (click)="sendEmail()"
+      >
+        📧 Send Email
+      </button>
+      <button
+        *ngIf="application.status === 'Accepted' && !interview"
+        class="btn-action btn-schedule"
+        (click)="scheduleInterview()"
+      >
+        📅 Schedule Interview
+      </button>
+    </div>
+  </div>
+
+  <!-- Not Found State -->
+  <div *ngIf="!loading && !application" class="empty-state">
+    <h3>Application not found</h3>
+    <button class="btn-primary" (click)="goBack()">
+      Back to Applications
+    </button>
+  </div>
+</div>

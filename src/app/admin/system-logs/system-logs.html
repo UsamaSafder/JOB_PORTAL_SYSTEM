@@ -1,0 +1,182 @@
+<div class="system-logs">
+      <div class="header">
+        <h2>System Logs</h2>
+        <div class="actions-bar">
+          <button (click)="refreshLogs()" class="btn-refresh">
+            🔄 Refresh
+          </button>
+          <button (click)="exportLogs()" class="btn-export">
+            📥 Export Logs
+          </button>
+          <button (click)="clearOldLogs()" class="btn-clear">
+            🗑️ Clear Old Logs
+          </button>
+        </div>
+      </div>
+
+      <div class="filters-section">
+        <div class="filter-group">
+          <label>Search:</label>
+          <input 
+            type="text" 
+            [(ngModel)]="searchTerm" 
+            (input)="filterLogs()"
+            placeholder="Search by action or user..."
+            class="search-input"
+          />
+        </div>
+
+        <div class="filter-group">
+          <label>User Type:</label>
+          <select [(ngModel)]="filterUserType" (change)="filterLogs()" class="filter-select">
+            <option value="all">All Types</option>
+            <option value="Admin">Admin</option>
+            <option value="Candidate">Candidate</option>
+            <option value="Company">Company</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Date Range:</label>
+          <select [(ngModel)]="filterDateRange" (change)="filterLogs()" class="filter-select">
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stats-cards">
+        <div class="stat-card total">
+          <div class="stat-icon">📊</div>
+          <div class="stat-info">
+            <h3>Total Logs</h3>
+            <p class="stat-number">{{ logs.length }}</p>
+          </div>
+        </div>
+        <div class="stat-card admin">
+          <div class="stat-icon">👨‍💼</div>
+          <div class="stat-info">
+            <h3>Admin Actions</h3>
+            <p class="stat-number">{{ getLogsByType('Admin') }}</p>
+          </div>
+        </div>
+        <div class="stat-card candidate">
+          <div class="stat-icon">👤</div>
+          <div class="stat-info">
+            <h3>Candidate Actions</h3>
+            <p class="stat-number">{{ getLogsByType('Candidate') }}</p>
+          </div>
+        </div>
+        <div class="stat-card company">
+          <div class="stat-icon">🏢</div>
+          <div class="stat-info">
+            <h3>Company Actions</h3>
+            <p class="stat-number">{{ getLogsByType('Company') }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <div class="table-header">
+          <h3>Activity Log</h3>
+          <span class="log-count">Showing {{ filteredLogs.length }} of {{ logs.length }} logs</span>
+        </div>
+
+        <table class="logs-table">
+          <thead>
+            <tr>
+              <th>Log ID</th>
+              <th>Timestamp</th>
+              <th>User Type</th>
+              <th>User ID</th>
+              <th>User Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of paginatedLogs">
+              <td>
+                <span class="log-id">#{{ log.logID }}</span>
+              </td>
+              <td>
+                <div class="timestamp">
+                  <span class="relative-time">{{ log.timestamp | formatTimestamp:'relative' }}</span>
+                  <span class="full-date">{{ log.timestamp | formatTimestamp:'full' }}</span>
+                </div>
+              </td>
+              <td>
+                <span [class]="'user-type-badge ' + log.userType.toLowerCase()">
+                  {{ getUserTypeIcon(log.userType) }} {{ log.userType }}
+                </span>
+              </td>
+              <td class="text-center">{{ log.userID }}</td>
+              <td>{{ log.userName || 'N/A' }}</td>
+              <td>
+                <div class="action-cell">
+                  <span [class]="'action-icon ' + getActionType(log.action)">
+                    {{ getActionIcon(log.action) }}
+                  </span>
+                  <span class="action-text">{{ log.action }}</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="filteredLogs.length === 0" class="no-data">
+          <div class="no-data-icon">📭</div>
+          <p>No logs found matching your criteria.</p>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="filteredLogs.length > 0" class="pagination">
+          <button 
+            (click)="previousPage()" 
+            [disabled]="currentPage === 1"
+            class="btn-page"
+          >
+            ← Previous
+          </button>
+          
+          <div class="page-info">
+            <span>Page {{ currentPage }} of {{ totalPages }}</span>
+            <select [(ngModel)]="itemsPerPage" (change)="updatePagination()" class="page-size">
+              <option [value]="10">10 per page</option>
+              <option [value]="25">25 per page</option>
+              <option [value]="50">50 per page</option>
+              <option [value]="100">100 per page</option>
+            </select>
+          </div>
+
+          <button 
+            (click)="nextPage()" 
+            [disabled]="currentPage === totalPages"
+            class="btn-page"
+          >
+            Next →
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Activity Timeline -->
+      <div class="timeline-section">
+        <h3>Recent Activity Timeline</h3>
+        <div class="timeline">
+          <div *ngFor="let log of getRecentLogs(10)" class="timeline-item">
+            <div class="timeline-marker" [class]="log.userType.toLowerCase()"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span [class]="'user-type-badge small ' + log.userType.toLowerCase()">
+                  {{ log.userType }}
+                </span>
+                <span class="timeline-time">{{ log.timestamp | formatTimestamp:'relative' }}</span>
+              </div>
+              <p class="timeline-action">{{ log.action }}</p>
+              <p class="timeline-user">by {{ log.userName || 'User #' + log.userID }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>

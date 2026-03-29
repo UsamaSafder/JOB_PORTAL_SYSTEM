@@ -1,0 +1,150 @@
+<!-- Navigation Bar -->
+<nav class="navbar">
+  <div class="container">
+    <div class="nav-brand">
+      <h2>🚀 JobPortal</h2>
+    </div>
+    <div class="nav-links">
+      <a (click)="scrollToSection('home')" style="cursor: pointer;">Home</a>
+      <a (click)="scrollToSection('features')" style="cursor: pointer;">Features</a>
+      <a (click)="scrollToSection('about')" style="cursor: pointer;">About</a>
+      <button class="btn-outline" (click)="navigateToLogin()">Login</button>
+      <button class="btn-primary" (click)="navigateToRegister()">Sign Up</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero" id="home">
+  <div class="container">
+    <div class="hero-content">
+      <h1 class="hero-title">Find Your Perfect Job Match</h1>
+      <p class="hero-subtitle">Connect with top employers and discover opportunities that match your skills and aspirations</p>
+      
+      <!-- Search Bar -->
+      <div class="search-container">
+        <input 
+          type="text" 
+          placeholder="Job title, keywords, or company" 
+          class="search-input"
+          #searchInput
+          (keyup.enter)="searchJobs(searchInput.value)">
+        <button class="search-btn" (click)="searchJobs(searchInput.value)">
+          Search Jobs
+        </button>
+      </div>
+
+      <div class="quick-actions">
+        <span>Popular searches:</span>
+        <a href="#">Software Engineer</a>
+        <a href="#">Graphic Designer</a>
+        <a href="#">Marketing Manager</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="features" id="features">
+  <div class="container">
+    <h2 class="section-title">Why Choose JobPortal?</h2>
+    <div class="features-grid">
+      <div class="feature-card" *ngFor="let feature of features">
+        <div class="feature-icon">{{ feature.icon }}</div>
+        <h3>{{ feature.title }}</h3>
+        <p>{{ feature.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats" id="about">
+  <div class="container">
+    <h2 class="section-title" style="color: white; margin-bottom: 2rem;">About JobPortal</h2>
+    <p style="font-size: 1.2rem; margin-bottom: 3rem; opacity: 0.95;">JobPortal is a comprehensive job search platform connecting talented candidates with leading companies. Our mission is to simplify the job search process and help you find the perfect career opportunity.</p>
+    
+    <div class="stats-grid">
+      <div class="stat-item" *ngFor="let stat of stats">
+        <h3>{{ stat.number }}</h3>
+        <p>{{ stat.label }}</p>
+      </div>
+    </div>
+    
+    <div class="about-features" style="margin-top: 3rem;">
+      <div class="about-item">
+        <h3>🎯 Our Vision</h3>
+        <p>To be the most trusted job portal platform, empowering careers and building successful teams.</p>
+      </div>
+      <div class="about-item">
+        <h3>💼 For Job Seekers</h3>
+        <p>Access thousands of opportunities, track applications, and connect with top employers.</p>
+      </div>
+      <div class="about-item">
+        <h3>🏢 For Employers</h3>
+        <p>Find the best talent, streamline hiring, and build your dream team efficiently.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta" id="about">
+  <div class="container">
+    <h2>About JobPortal</h2>
+    <p>JobPortal is a comprehensive job search platform connecting talented candidates with leading companies. Our mission is to simplify the job search process and help you find the perfect career opportunity.</p>
+    <div class="about-features">
+      <div class="about-item">
+        <h3>🎯 Our Vision</h3>
+        <p>To be the most trusted job portal platform, empowering careers and building successful teams.</p>
+      </div>
+      <div class="about-item">
+        <h3>💼 For Job Seekers</h3>
+        <p>Access thousands of opportunities, track applications, and connect with top employers.</p>
+      </div>
+      <div class="about-item">
+        <h3>🏢 For Employers</h3>
+        <p>Find the best talent, streamline hiring, and build your dream team efficiently.</p>
+      </div>
+    </div>
+    <h2 class="cta-title">Ready to Get Started?</h2>
+    <p>Join thousands of job seekers and employers today</p>
+    <div class="cta-buttons">
+      <button class="btn-large btn-primary" (click)="navigateToRegister()">Create Account</button>
+      <button class="btn-large btn-outline-white" (click)="navigateToLogin()">Login Now</button>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>🚀 JobPortal</h3>
+        <p>Connecting talent with opportunity</p>
+      </div>
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <a href="#">About Us</a>
+        <a href="#">Contact</a>
+        <a href="#">Privacy Policy</a>
+      </div>
+      <div class="footer-section">
+        <h4>For Employers</h4>
+        <a href="#">Post a Job</a>
+        <a href="#">Pricing</a>
+        <a href="#">Resources</a>
+      </div>
+      <div class="footer-section">
+        <h4>For Job Seekers</h4>
+        <a href="#">Browse Jobs</a>
+        <a href="#">Career Advice</a>
+        <a href="#">Resume Tips</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>2025 JobPortal. All rights reserved.</p>
+    </div>
+  </div>
+</footer>

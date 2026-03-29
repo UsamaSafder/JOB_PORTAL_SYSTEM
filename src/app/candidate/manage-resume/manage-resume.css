@@ -1,0 +1,42 @@
+.resume-container { max-width: 1000px; margin: 0 auto; }
+    .page-header h2 { font-size: 2rem; color: #333; margin-bottom: 10px; }
+    .page-header p { color: #666; font-size: 1.1rem; margin-bottom: 30px; }
+    .upload-section { background: white; padding: 30px; border-radius: 12px; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 30px; }
+    .upload-area { border: 3px dashed #667eea; border-radius: 12px; padding: 60px 30px; 
+      text-align: center; cursor: pointer; transition: all 0.3s; }
+    .upload-area:hover { background: rgba(102, 126, 234, 0.05); border-color: #764ba2; }
+    .upload-icon { font-size: 4rem; margin-bottom: 20px; }
+    .upload-area h3 { color: #333; font-size: 1.5rem; margin-bottom: 10px; }
+    .upload-area p { color: #666; margin-bottom: 5px; }
+    .file-info { font-size: 0.85rem; color: #999; }
+    .upload-progress { margin-top: 20px; text-align: center; }
+    .progress-bar { width: 100%; height: 8px; background: #f0f0f0; border-radius: 10px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); 
+      animation: progress 2s ease-in-out infinite; }
+    @keyframes progress { 0%, 100% { width: 0%; } 50% { width: 100%; } }
+    .resumes-section { background: white; padding: 30px; border-radius: 12px; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .resumes-section h3 { font-size: 1.5rem; color: #333; margin-bottom: 20px; }
+    .resumes-list { display: flex; flex-direction: column; gap: 15px; }
+    .resume-card { display: flex; align-items: center; gap: 20px; padding: 20px; border: 2px solid #f0f0f0; 
+      border-radius: 10px; transition: all 0.3s; }
+    .resume-card:hover { border-color: #667eea; box-shadow: 0 2px 8px rgba(102,126,234,0.1); }
+    .resume-icon { font-size: 3rem; flex-shrink: 0; }
+    .resume-info { flex: 1; }
+    .resume-info h4 { color: #333; font-size: 1.1rem; margin: 0 0 5px 0; }
+    .resume-meta { color: #666; font-size: 0.9rem; margin: 5px 0; }
+    .active-badge { display: inline-block; background: #28a745; color: white; padding: 4px 12px; 
+      border-radius: 15px; font-size: 0.85rem; font-weight: 500; margin-top: 5px; }
+    .resume-actions { display: flex; gap: 10px; flex-shrink: 0; }
+    .btn-action { background: #667eea; color: white; border: none; padding: 8px 16px; 
+      border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.3s; }
+    .btn-action:hover { background: #764ba2; }
+    .btn-delete { background: #dc3545; color: white; border: none; padding: 8px 16px; 
+      border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.3s; }
+    .btn-delete:hover { background: #c82333; }
+    .empty-state { text-align: center; padding: 40px; color: #999; }
+    @media (max-width: 768px) {
+      .resume-card { flex-direction: column; align-items: flex-start; }
+      .resume-actions { width: 100%; flex-direction: column; }
+    }

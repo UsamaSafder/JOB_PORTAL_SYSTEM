@@ -1,0 +1,171 @@
+<div class="applications-container">
+  <div class="page-header">
+    <div>
+      <h1>Applications</h1>
+      <p *ngIf="!jobId">View and manage all candidate applications</p>
+      <p *ngIf="jobId">Applications for this specific job</p>
+    </div>
+    <button *ngIf="jobId" class="btn-back" routerLink="/company/manage-jobs">
+      ← Back to Jobs
+    </button>
+  </div>
+
+  <!-- Status Summary -->
+  <div class="status-summary">
+    <div class="summary-item">
+      <div class="summary-number">{{ getStatusCounts().all }}</div>
+      <div class="summary-label">Total</div>
+    </div>
+    <div class="summary-item pending">
+      <div class="summary-number">{{ getStatusCounts().Pending }}</div>
+      <div class="summary-label">Pending</div>
+    </div>
+    <div class="summary-item reviewed">
+      <div class="summary-number">{{ getStatusCounts().Reviewed }}</div>
+      <div class="summary-label">Reviewed</div>
+    </div>
+    <div class="summary-item accepted">
+      <div class="summary-number">{{ getStatusCounts().Accepted }}</div>
+      <div class="summary-label">Accepted</div>
+    </div>
+    <div class="summary-item rejected">
+      <div class="summary-number">{{ getStatusCounts().Rejected }}</div>
+      <div class="summary-label">Rejected</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="search-box">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange()"
+        placeholder="Search by candidate name, email, or job title..."
+        class="search-input"
+      />
+      <span class="search-icon">🔍</span>
+    </div>
+
+    <div class="filter-group">
+      <label>Status:</label>
+      <select [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()" class="filter-select">
+        <option value="all">All Applications</option>
+        <option value="Pending">Pending</option>
+        <option value="Reviewed">Reviewed</option>
+        <option value="Accepted">Accepted</option>
+        <option value="Rejected">Rejected</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading applications...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message" style="padding: 15px; background-color: #fee; border: 1px solid #fcc; border-radius: 4px; margin: 20px 0; color: #c00;">
+    <strong>Error:</strong> {{ errorMessage }}
+  </div>
+
+  <!-- Applications List -->
+  <div *ngIf="!loading">
+    <div *ngIf="filteredApplications.length === 0" class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h3>No applications found</h3>
+      <p *ngIf="searchTerm || filterStatus !== 'all'">
+        Try adjusting your filters or search term
+      </p>
+      <p *ngIf="!searchTerm && filterStatus === 'all'">
+        No one has applied yet. Share your job postings!
+      </p>
+    </div>
+
+    <div class="applications-list">
+      <div *ngFor="let app of filteredApplications" class="application-card">
+        <!-- Candidate Info -->
+        <div class="candidate-section">
+          <div class="candidate-avatar">
+            {{ app.candidateName?.charAt(0) || 'U' }}
+          </div>
+          <div class="candidate-info">
+            <h3>{{ app.candidateName || 'Unknown Candidate' }}</h3>
+            <p class="candidate-email">📧 {{ app.candidateEmail || 'No email' }}</p>
+            <p class="candidate-phone" *ngIf="app.candidatePhone">
+              📱 {{ app.candidatePhone }}
+            </p>
+            <p class="candidate-experience">
+              💼 {{ app.experienceYears || 0 }} years experience
+            </p>
+          </div>
+        </div>
+
+        <!-- Application Details -->
+        <div class="application-details">
+          <div class="detail-row">
+            <span class="detail-label">Job:</span>
+            <span class="detail-value">{{ app.jobTitle || 'Job Title' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Applied:</span>
+            <span class="detail-value">{{ app.appliedAt | date: 'MMM d, y' }}</span>
+          </div>
+          <div class="detail-row" *ngIf="app.candidateSkills">
+            <span class="detail-label">Skills:</span>
+            <span class="detail-value">{{ app.candidateSkills }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Status:</span>
+            <span [class]="'status-badge ' + getStatusClass(app.status)">
+              {{ app.status || 'Unknown' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="application-actions">
+          <a
+            [routerLink]="['/company/application', app.applicationId]"
+            class="btn-action btn-view"
+          >
+            👁️ View Details
+          </a>
+
+          <div class="status-actions" *ngIf="app.status === 'Pending'">
+            <button
+              class="btn-action btn-accept"
+              (click)="updateStatus(app.applicationId!, 'Reviewed')"
+            >
+              ✓ Mark Reviewed
+            </button>
+          </div>
+
+          <div class="status-actions" *ngIf="app.status === 'Reviewed'">
+            <button
+              class="btn-action btn-accept"
+              (click)="updateStatus(app.applicationId!, 'Accepted')"
+            >
+              ✓ Accept
+            </button>
+            <button
+              class="btn-action btn-reject"
+              (click)="updateStatus(app.applicationId!, 'Rejected')"
+            >
+              ✗ Reject
+            </button>
+          </div>
+
+          <button
+            *ngIf="app.status === 'Accepted'"
+            [routerLink]="['/company/schedule-interview', app.applicationId]"
+            class="btn-action btn-interview"
+          >
+            📅 Schedule Interview
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

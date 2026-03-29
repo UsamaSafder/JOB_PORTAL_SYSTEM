@@ -1,0 +1,72 @@
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.collapsed]="!isSidebarOpen">
+    <!-- Logo -->
+    <div class="sidebar-header">
+      <h2 class="logo" (click)="navigateToHome()" *ngIf="isSidebarOpen">
+        🚀 JobPortal
+      </h2>
+      <h2 class="logo-small" *ngIf="!isSidebarOpen">🚀</h2>
+      <span class="admin-badge" *ngIf="isSidebarOpen">Admin Panel</span>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="sidebar-menu">
+      <a 
+        *ngFor="let item of menuItems"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        class="menu-item"
+        (click)="setActiveMenu(item.route)">
+        <span class="menu-icon">{{ item.icon }}</span>
+        <span class="menu-label" *ngIf="isSidebarOpen">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <!-- Logout Button -->
+    <div class="sidebar-footer">
+      <button class="logout-btn" (click)="logout()">
+        <span class="menu-icon">🚪</span>
+        <span *ngIf="isSidebarOpen">Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content" [class.expanded]="!isSidebarOpen">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <button class="toggle-btn" (click)="toggleSidebar()">
+          <span *ngIf="isSidebarOpen">☰</span>
+          <span *ngIf="!isSidebarOpen">☰</span>
+        </button>
+        <h1 class="page-title">Admin Dashboard</h1>
+      </div>
+
+      <div class="header-right">
+        <!-- Notifications -->
+        <button class="icon-btn">
+          <span class="notification-badge">5</span>
+          🔔
+        </button>
+
+        <!-- Admin Profile -->
+        <div class="admin-profile">
+          <div class="profile-info">
+            <span class="profile-name">{{ currentUser.name }}</span>
+            <span class="profile-role">{{ currentUser.role }}</span>
+          </div>
+          <div class="profile-avatar">
+            <span>👤</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

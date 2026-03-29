@@ -1,0 +1,109 @@
+<div class="browse-jobs-container">
+  <div class="page-header">
+    <h2>Browse Jobs</h2>
+    <p>Find your dream job from {{ jobs.length }} available positions</p>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="search-bar">
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery" 
+        (input)="applyFilters()"
+        placeholder="🔍 Search by job title or keywords..."
+        class="search-input"
+      />
+    </div>
+
+    <div class="filters-row">
+      <select [(ngModel)]="selectedLocation" (change)="applyFilters()" class="filter-select">
+        <option value="">All Locations</option>
+        <option *ngFor="let location of locations" [value]="location">{{ location }}</option>
+      </select>
+
+      <select [(ngModel)]="selectedJobType" (change)="applyFilters()" class="filter-select">
+        <option value="">All Job Types</option>
+        <option *ngFor="let type of jobTypes" [value]="type">{{ type }}</option>
+      </select>
+
+      <select [(ngModel)]="selectedCompany" (change)="applyFilters()" class="filter-select">
+        <option value="">All Companies</option>
+        <option *ngFor="let company of companies" [value]="company">{{ company }}</option>
+      </select>
+
+      <button (click)="clearFilters()" class="btn-clear">Clear Filters</button>
+    </div>
+
+    <div class="results-info">
+      Showing {{ filteredJobs.length }} of {{ jobs.length }} jobs
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading jobs...</p>
+  </div>
+
+  <!-- Jobs List -->
+  <div *ngIf="!loading" class="jobs-grid">
+    <div *ngFor="let job of filteredJobs" class="job-card">
+      <div class="job-header">
+        <div class="company-logo">{{ job.companyName?.charAt(0) }}</div>
+        <div class="job-title-section">
+          <h3>{{ job.title }}</h3>
+          <p class="company-name">{{ job.companyName }}</p>
+        </div>
+      </div>
+
+      <div class="job-details">
+        <span class="detail-item">
+          <span class="icon">📍</span>
+          {{ job.location }}
+        </span>
+        <span class="detail-item">
+          <span class="icon">💼</span>
+          <span [ngClass]="['job-type-badge', getJobTypeClass(job.employmentType)]">
+            {{ job.employmentType }}
+          </span>
+        </span>
+        <span class="detail-item">
+          <span class="icon">💰</span>
+          {{ job.salaryRange || 'Not specified' }}
+        </span>
+      </div>
+
+      <p class="job-description">{{ (job.description || '').substring(0, 150) }}{{ (job.description || '').length > 150 ? '...' : '' }}</p>
+
+      <div class="job-skills">
+        <ng-container *ngIf="job.requirements; else noRequirements">
+          <span *ngFor="let skill of (job.requirements.split(',') | slice:0:3)" class="skill-tag">
+            {{ skill.trim() }}
+          </span>
+          <span *ngIf="(job.requirements.split(',').length) > 3" class="skill-tag more">
+            +{{ job.requirements.split(',').length - 3 }} more
+          </span>
+        </ng-container>
+        <ng-template #noRequirements>
+          <span class="no-requirements">No requirements listed</span>
+        </ng-template>
+      </div>
+
+      <div class="job-footer">
+        <span class="post-date">Posted {{ job.postedAt | date: 'MMM d, y' }}</span>
+        <a [routerLink]="['/candidate/job-details', job.jobId]" class="btn-view-details">
+          View Details →
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && filteredJobs.length === 0" class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <h3>No Jobs Found</h3>
+    <p>Try adjusting your filters or search terms</p>
+    <button (click)="clearFilters()" class="btn-primary">Clear All Filters</button>
+  </div>
+</div>

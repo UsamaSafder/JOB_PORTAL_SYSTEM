@@ -1,0 +1,222 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <div>
+      <h1>Company Profile</h1>
+      <p>Manage your company information</p>
+    </div>
+    <div class="header-actions">
+      <span [class]="getVerificationBadgeClass()">
+        ✓ Verified
+      </span>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading profile...</p>
+  </div>
+
+  <!-- Profile Content -->
+  <div *ngIf="!loading && company" class="profile-content">
+    <!-- Company Header Card -->
+    <div class="company-header-card">
+      <div class="company-logo">
+        {{ company.companyName.charAt(0) || 'C' }}
+      </div>
+      <div class="company-main-info">
+        <h2>{{ company.companyName }}</h2>
+        <p class="company-tagline">{{ company.industry || 'Industry' }} | {{ company.location || 'Location' }}</p>
+        <p class="company-member-since">Member since {{ company.createdAt | date: 'MMMM y' }}</p>
+      </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div *ngIf="successMessage" class="alert alert-success">
+      ✓ {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-error">
+      ✗ {{ errorMessage }}
+    </div>
+
+    <!-- Profile Form -->
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form">
+      <!-- Basic Information Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3>📋 Basic Information</h3>
+          <button
+            *ngIf="!editMode"
+            type="button"
+            class="btn-edit"
+            (click)="toggleEditMode()"
+          >
+            ✏️ Edit Profile
+          </button>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="companyName">Company Name *</label>
+            <input
+              type="text"
+              id="companyName"
+              formControlName="companyName"
+              class="form-control"
+              [class.invalid]="editMode && f['companyName'].errors && f['companyName'].touched"
+            />
+            <div *ngIf="editMode && f['companyName'].errors && f['companyName'].touched" class="error-message">
+              <span *ngIf="f['companyName'].errors['required']">Company name is required</span>
+              <span *ngIf="f['companyName'].errors['minlength']">Minimum 3 characters required</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address *</label>
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              class="form-control"
+            />
+            <small class="form-hint">Email cannot be changed for security reasons</small>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phoneNumber">Phone Number</label>
+            <input
+              type="tel"
+              id="phoneNumber"
+              formControlName="phoneNumber"
+              class="form-control"
+              placeholder="03001234567"
+              [class.invalid]="editMode && f['phoneNumber'].errors && f['phoneNumber'].touched"
+            />
+            <div *ngIf="editMode && f['phoneNumber'].errors && f['phoneNumber'].touched" class="error-message">
+              <span *ngIf="f['phoneNumber'].errors['pattern']">Enter valid 11-digit phone number</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="industry">Industry *</label>
+            <select
+              id="industry"
+              formControlName="industry"
+              class="form-control"
+              [class.invalid]="editMode && f['industry'].errors && f['industry'].touched"
+            >
+              <option value="">Select Industry</option>
+              <option *ngFor="let ind of industries" [value]="ind">{{ ind }}</option>
+            </select>
+            <div *ngIf="editMode && f['industry'].errors && f['industry'].touched" class="error-message">
+              <span *ngIf="f['industry'].errors['required']">Industry is required</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="location">Location *</label>
+            <input
+              type="text"
+              id="location"
+              formControlName="location"
+              class="form-control"
+              placeholder="e.g., Karachi, Pakistan"
+              [class.invalid]="editMode && f['location'].errors && f['location'].touched"
+            />
+            <div *ngIf="editMode && f['location'].errors && f['location'].touched" class="error-message">
+              <span *ngIf="f['location'].errors['required']">Location is required</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="website">Website</label>
+            <input
+              type="url"
+              id="website"
+              formControlName="website"
+              class="form-control"
+              placeholder="https://www.example.com"
+              [class.invalid]="editMode && f['website'].errors && f['website'].touched"
+            />
+            <div *ngIf="editMode && f['website'].errors && f['website'].touched" class="error-message">
+              <span *ngIf="f['website'].errors['pattern']">Enter valid URL starting with http:// or https://</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Company Description -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3>📝 Company Description</h3>
+        </div>
+
+        <div class="form-group">
+          <label for="description">About Your Company</label>
+          <textarea
+            id="description"
+            formControlName="description"
+            class="form-control"
+            rows="6"
+            placeholder="Tell candidates about your company, culture, and what makes it a great place to work..."
+            [class.invalid]="editMode && f['description'].errors && f['description'].touched"
+          ></textarea>
+          <div *ngIf="editMode && f['description'].errors && f['description'].touched" class="error-message">
+            <span *ngIf="f['description'].errors['minlength']">Description should be at least 20 characters</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Company Stats -->
+      <div class="stats-section">
+        <div class="stat-item">
+          <div class="stat-icon">📊</div>
+          <div class="stat-info">
+            <div class="stat-label">Account Status</div>
+            <div class="stat-value">{{ company.isActive ? 'Active' : 'Inactive' }}</div>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">✓</div>
+          <div class="stat-info">
+            <div class="stat-label">Verification</div>
+            <div class="stat-value">{{ company.isVerified ? 'Verified' : 'Pending' }}</div>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">📅</div>
+          <div class="stat-info">
+            <div class="stat-label">Member Since</div>
+            <div class="stat-value">{{ company.createdAt | date: 'MMM y' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div *ngIf="editMode" class="form-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="toggleEditMode()"
+          [disabled]="saving"
+        >
+          Cancel
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="saving || profileForm.invalid">
+          <span *ngIf="!saving">💾 Save Changes</span>
+          <span *ngIf="saving">Saving...</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !company" class="empty-state">
+    <h3>No company profile found</h3>
+    <p>Please log in again or contact support.</p>
+  </div>
+</div>

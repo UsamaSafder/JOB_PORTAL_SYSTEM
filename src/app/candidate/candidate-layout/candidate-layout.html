@@ -1,0 +1,61 @@
+<div class="layout-container">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.collapsed]="!isSidebarOpen">
+    <div class="sidebar-header">
+      <h2 *ngIf="isSidebarOpen">Job Portal</h2>
+      <button class="toggle-btn" (click)="toggleSidebar()">
+        <span *ngIf="isSidebarOpen">◀</span>
+        <span *ngIf="!isSidebarOpen">▶</span>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/candidate/dashboard" routerLinkActive="active" class="nav-item">
+        <span class="icon">📊</span>
+        <span class="label" *ngIf="isSidebarOpen">Dashboard</span>
+      </a>
+      <a routerLink="/candidate/browse-jobs" routerLinkActive="active" class="nav-item">
+        <span class="icon">🔍</span>
+        <span class="label" *ngIf="isSidebarOpen">Browse Jobs</span>
+      </a>
+      <a routerLink="/candidate/my-applications" routerLinkActive="active" class="nav-item">
+        <span class="icon">📄</span>
+        <span class="label" *ngIf="isSidebarOpen">My Applications</span>
+      </a>
+      <a routerLink="/candidate/my-interviews" routerLinkActive="active" class="nav-item">
+        <span class="icon">📅</span>
+        <span class="label" *ngIf="isSidebarOpen">My Interviews</span>
+      </a>
+      <a routerLink="/candidate/manage-resume" routerLinkActive="active" class="nav-item">
+        <span class="icon">📋</span>
+        <span class="label" *ngIf="isSidebarOpen">Manage Resume</span>
+      </a>
+      <a routerLink="/candidate/profile" routerLinkActive="active" class="nav-item">
+        <span class="icon">👤</span>
+        <span class="label" *ngIf="isSidebarOpen">My Profile</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1>Candidate Portal</h1>
+      </div>
+      <div class="header-right">
+        <div class="user-info">
+          <span class="user-name">{{ candidateName }}</span>
+          <div class="user-avatar">{{ candidateName.charAt(0) }}</div>
+        </div>
+        <button class="logout-btn" (click)="logout()">Logout</button>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

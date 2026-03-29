@@ -1,0 +1,181 @@
+<!-- src/app/company/company-dashboard/company-dashboard.component.html -->
+
+<div class="dashboard-container">
+  <h1 class="page-title">Company Dashboard</h1>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading dashboard...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading">
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card stat-primary">
+        <div class="stat-icon">📊</div>
+        <div class="stat-info">
+          <h3>{{ stats.totalJobs }}</h3>
+          <p>Total Jobs Posted</p>
+        </div>
+      </div>
+
+      <div class="stat-card stat-success">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+          <h3>{{ stats.activeJobs }}</h3>
+          <p>Active Jobs</p>
+        </div>
+      </div>
+
+      <div class="stat-card stat-warning">
+        <div class="stat-icon">📄</div>
+        <div class="stat-info">
+          <h3>{{ stats.totalApplications }}</h3>
+          <p>Total Applications</p>
+        </div>
+      </div>
+
+      <div class="stat-card stat-info">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-info">
+          <h3>{{ stats.pendingApplications }}</h3>
+          <p>Pending Review</p>
+        </div>
+      </div>
+
+      <div class="stat-card stat-reviewed">
+        <div class="stat-icon">👁️</div>
+        <div class="stat-info">
+          <h3>{{ stats.reviewedApplications }}</h3>
+          <p>Reviewed</p>
+        </div>
+      </div>
+
+      <div class="stat-card stat-accepted">
+        <div class="stat-icon">🎉</div>
+        <div class="stat-info">
+          <h3>{{ stats.acceptedApplications }}</h3>
+          <p>Accepted</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Jobs Section -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>Recent Job Postings</h2>
+        <button class="btn-primary" routerLink="/company/post-job">
+          + Post New Job
+        </button>
+      </div>
+
+      <div *ngIf="recentJobs.length === 0" class="empty-state">
+        <p>No jobs posted yet. Start by posting your first job!</p>
+        <button class="btn-primary" routerLink="/company/post-job">Post Job</button>
+      </div>
+
+      <div *ngIf="recentJobs.length > 0" class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Job Title</th>
+              <th>Location</th>
+              <th>Employment Type</th>
+              <th>Posted Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let job of recentJobs">
+              <td>{{ job.title }}</td>
+              <td>{{ job.location || 'N/A' }}</td>
+              <td><span class="badge">{{ job.employmentType }}</span></td>
+              <td>{{ job.postedAt | date: 'MMM dd, yyyy' }}</td>
+              <td>
+                <span class="status-badge" [class.active]="job.isActive" [class.inactive]="!job.isActive">
+                  {{ job.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td>
+                <button class="btn-action" (click)="viewJobDetails(job.jobId!)">View</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-footer" *ngIf="recentJobs.length > 0">
+        <a routerLink="/company/manage-jobs" class="link">View All Jobs →</a>
+      </div>
+    </div>
+
+    <!-- Recent Applications Section -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>Recent Applications</h2>
+        <a routerLink="/company/applications" class="link">View All →</a>
+      </div>
+
+      <div *ngIf="recentApplications.length === 0" class="empty-state">
+        <p>No applications received yet.</p>
+      </div>
+
+      <div *ngIf="recentApplications.length > 0" class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Candidate Name</th>
+              <th>Job Title</th>
+              <th>Applied Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let application of recentApplications">
+              <td>{{ application.candidateName || 'N/A' }}</td>
+              <td>{{ application.jobTitle || 'N/A' }}</td>
+              <td>{{ application.appliedAt | date: 'MMM dd, yyyy' }}</td>
+              <td>
+                <span class="status-badge" [ngClass]="getStatusClass(application.status)">
+                  {{ application.status }}
+                </span>
+              </td>
+              <td>
+                <button class="btn-action" (click)="viewApplicationDetails(application.applicationId!)">
+                  View Details
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h2>Quick Actions</h2>
+      <div class="action-buttons">
+        <button class="action-btn" routerLink="/company/post-job">
+          <span class="icon">➕</span>
+          <span>Post New Job</span>
+        </button>
+        <button class="action-btn" routerLink="/company/applications">
+          <span class="icon">📄</span>
+          <span>View Applications</span>
+        </button>
+        <button class="action-btn" routerLink="/company/manage-jobs">
+          <span class="icon">📋</span>
+          <span>Manage Jobs</span>
+        </button>
+        <button class="action-btn" routerLink="/company/profile">
+          <span class="icon">🏢</span>
+          <span>Edit Profile</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

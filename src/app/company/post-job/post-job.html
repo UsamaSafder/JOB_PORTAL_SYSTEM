@@ -1,0 +1,155 @@
+<!-- src/app/company/post-job/post-job.component.html -->
+
+<div class="post-job-container">
+  <div class="header">
+    <h1>{{ isEditMode ? 'Edit Job' : 'Post New Job' }}</h1>
+    <p class="subtitle">{{ isEditMode ? 'Update the job details' : 'Fill in the details to create a new job posting' }}</p>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    ✓ {{ successMessage }}
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-error">
+    ✕ {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="jobForm" (ngSubmit)="onSubmit()" class="job-form">
+    <!-- Job Title -->
+    <div class="form-group">
+      <label for="title">Job Title <span class="required">*</span></label>
+      <input
+        type="text"
+        id="title"
+        formControlName="title"
+        class="form-control"
+        placeholder="e.g., Senior Software Engineer"
+        [class.invalid]="submitted && f['title'].errors"
+      />
+      <div *ngIf="submitted && f['title'].errors" class="error-message">
+        <span *ngIf="f['title'].errors['required']">Job title is required</span>
+        <span *ngIf="f['title'].errors['minlength']">Job title must be at least 3 characters</span>
+      </div>
+    </div>
+
+    <!-- Location -->
+    <div class="form-group">
+      <label for="location">Location <span class="required">*</span></label>
+      <input
+        type="text"
+        id="location"
+        formControlName="location"
+        class="form-control"
+        placeholder="e.g., Lahore, Pakistan"
+        [class.invalid]="submitted && f['location'].errors"
+      />
+      <div *ngIf="submitted && f['location'].errors" class="error-message">
+        <span *ngIf="f['location'].errors['required']">Location is required</span>
+      </div>
+    </div>
+
+    <!-- Employment Type and Salary Range -->
+    <div class="form-row">
+      <div class="form-group">
+        <label for="employmentType">Employment Type <span class="required">*</span></label>
+        <select
+          id="employmentType"
+          formControlName="employmentType"
+          class="form-control"
+          [class.invalid]="submitted && f['employmentType'].errors"
+        >
+          <option *ngFor="let type of employmentTypes" [value]="type">{{ type }}</option>
+        </select>
+        <div *ngIf="submitted && f['employmentType'].errors" class="error-message">
+          <span *ngIf="f['employmentType'].errors['required']">Employment type is required</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="salaryRange">Salary Range <span class="required">*</span></label>
+        <input
+          type="text"
+          id="salaryRange"
+          formControlName="salaryRange"
+          class="form-control"
+          placeholder="e.g., 80k-100k PKR"
+          [class.invalid]="submitted && f['salaryRange'].errors"
+        />
+        <div *ngIf="submitted && f['salaryRange'].errors" class="error-message">
+          <span *ngIf="f['salaryRange'].errors['required']">Salary range is required</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deadline -->
+    <div class="form-group">
+      <label for="deadline">Application Deadline <span class="required">*</span></label>
+      <input
+        type="date"
+        id="deadline"
+        formControlName="deadline"
+        class="form-control"
+        [class.invalid]="submitted && f['deadline'].errors"
+      />
+      <div *ngIf="submitted && f['deadline'].errors" class="error-message">
+        <span *ngIf="f['deadline'].errors['required']">Deadline is required</span>
+      </div>
+    </div>
+
+    <!-- Job Description -->
+    <div class="form-group">
+      <label for="description">Job Description <span class="required">*</span></label>
+      <textarea
+        id="description"
+        formControlName="description"
+        class="form-control"
+        rows="6"
+        placeholder="Describe the job responsibilities, work environment, and what makes this position unique..."
+        [class.invalid]="submitted && f['description'].errors"
+      ></textarea>
+      <div *ngIf="submitted && f['description'].errors" class="error-message">
+        <span *ngIf="f['description'].errors['required']">Job description is required</span>
+        <span *ngIf="f['description'].errors['minlength']">Description must be at least 20 characters</span>
+      </div>
+    </div>
+
+    <!-- Requirements -->
+    <div class="form-group">
+      <label for="requirements">Requirements <span class="required">*</span></label>
+      <textarea
+        id="requirements"
+        formControlName="requirements"
+        class="form-control"
+        rows="6"
+        placeholder="List the required skills, qualifications, and experience..."
+        [class.invalid]="submitted && f['requirements'].errors"
+      ></textarea>
+      <div *ngIf="submitted && f['requirements'].errors" class="error-message">
+        <span *ngIf="f['requirements'].errors['required']">Requirements are required</span>
+        <span *ngIf="f['requirements'].errors['minlength']">Requirements must be at least 10 characters</span>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="resetForm()"
+        [disabled]="loading"
+      >
+        Reset
+      </button>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="loading"
+      >
+        <span *ngIf="!loading">{{ isEditMode ? 'Update Job' : 'Post Job' }}</span>
+        <span *ngIf="loading">{{ isEditMode ? 'Updating...' : 'Posting...' }}</span>
+      </button>
+    </div>
+  </form>
+</div>

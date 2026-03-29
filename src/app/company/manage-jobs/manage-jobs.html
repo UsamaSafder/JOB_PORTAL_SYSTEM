@@ -1,0 +1,116 @@
+<!-- src/app/company/manage-jobs/manage-jobs.component.html -->
+
+<div class="manage-jobs-container">
+  <div class="header">
+    <div class="header-content">
+      <h1>Manage Jobs</h1>
+      <button class="btn-primary" routerLink="/company/post-job">
+        + Post New Job
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="search-box">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange()"
+        placeholder="Search by job title or location..."
+        class="search-input"
+      />
+      <span class="search-icon">🔍</span>
+    </div>
+
+    <select [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()" class="filter-select">
+      <option value="all">All Jobs</option>
+      <option value="active">Active Jobs</option>
+      <option value="inactive">Inactive Jobs</option>
+    </select>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading jobs...</p>
+  </div>
+
+  <!-- Jobs List -->
+  <div *ngIf="!loading">
+    <div *ngIf="filteredJobs.length === 0" class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>No jobs found</h3>
+      <p *ngIf="jobs.length === 0">You haven't posted any jobs yet.</p>
+      <p *ngIf="jobs.length > 0">Try adjusting your filters or search terms.</p>
+      <button class="btn-primary" routerLink="/company/post-job" *ngIf="jobs.length === 0">
+        Post Your First Job
+      </button>
+    </div>
+
+    <div class="jobs-grid" *ngIf="filteredJobs.length > 0">
+      <div *ngFor="let job of filteredJobs" class="job-card">
+        <div class="job-header">
+          <div class="job-title-section">
+            <h3>{{ job.title }}</h3>
+            <span class="status-badge" [class.active]="job.isActive" [class.inactive]="!job.isActive">
+              {{ job.isActive ? '● Active' : '○ Inactive' }}
+            </span>
+          </div>
+          <div class="job-actions">
+            <button class="action-btn edit" (click)="editJob(job.jobId!)" title="Edit">
+              ✏️
+            </button>
+            <button class="action-btn delete" (click)="deleteJob(job.jobId!)" title="Delete">
+              🗑️
+            </button>
+          </div>
+        </div>
+
+        <div class="job-details">
+          <div class="detail-item">
+            <span class="icon">📍</span>
+            <span>{{ job.location || 'Location not specified' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="icon">💼</span>
+            <span>{{ job.employmentType }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="icon">💰</span>
+            <span>{{ job.salaryRange || 'Not specified' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="icon">📅</span>
+            <span>Posted: {{ job.postedAt | date: 'MMM dd, yyyy' }}</span>
+          </div>
+          <div class="detail-item" *ngIf="job.deadline">
+            <span class="icon">⏰</span>
+            <span [class.deadline-passed]="isDeadlinePassed(job.deadline)">
+              Deadline: {{ job.deadline | date: 'MMM dd, yyyy' }}
+              <span *ngIf="isDeadlinePassed(job.deadline)" class="expired-label">(Expired)</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="job-description">
+          <p>{{ job.description?.substring(0, 150) }}{{ (job.description?.length ?? 0) > 150 ? '...' : '' }}</p>
+        </div>
+
+        <div class="job-footer">
+          <button class="btn-secondary" (click)="viewApplications(job.jobId!)">
+            📄 View Applications
+          </button>
+          <button
+            class="btn-toggle"
+            [class.activate]="!job.isActive"
+            [class.deactivate]="job.isActive"
+            (click)="toggleJobStatus(job)"
+          >
+            {{ job.isActive ? 'Deactivate' : 'Activate' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,141 @@
+ <div class="manage-candidates">
+      <div class="header">
+        <h2>Manage Candidates</h2>
+        <div class="search-filter">
+          <input 
+            type="text" 
+            [(ngModel)]="searchTerm" 
+            (input)="filterCandidates()"
+            placeholder="Search by name, email, or skills..."
+            class="search-input"
+          />
+          <select [(ngModel)]="filterStatus" (change)="filterCandidates()" class="filter-select">
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stats-cards">
+        <div class="stat-card">
+          <h3>Total Candidates</h3>
+          <p class="stat-number">{{ candidates.length }}</p>
+        </div>
+        <div class="stat-card">
+          <h3>Active Candidates</h3>
+          <p class="stat-number">{{ getActiveCandidates() }}</p>
+        </div>
+        <div class="stat-card">
+          <h3>Inactive Candidates</h3>
+          <p class="stat-number">{{ getInactiveCandidates() }}</p>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="candidates-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Skills</th>
+              <th>Experience</th>
+              <th>Status</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let candidate of filteredCandidates">
+              <td>{{ candidate.candidateID }}</td>
+              <td>{{ candidate.fullName }}</td>
+              <td>{{ candidate.email }}</td>
+              <td>{{ candidate.phoneNumber }}</td>
+              <td>
+                <span class="skills-preview">{{ getSkillsPreview(candidate.skills) }}</span>
+              </td>
+              <td>{{ candidate.experienceYears !== undefined ? candidate.experienceYears : 0 }} years</td>
+              <td>
+                <span [class]="'status-badge ' + (candidate.isActive ? 'active' : 'inactive')">
+                  {{ candidate.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td>{{ candidate.createdAt | date:'shortDate' }}</td>
+              <td class="actions">
+                <button (click)="viewCandidate(candidate)" class="btn-view" title="View Details">
+                  <i class="icon-view">👁️</i>
+                </button>
+                <button 
+                  (click)="toggleStatus(candidate)" 
+                  [class]="'btn-toggle ' + (candidate.isActive ? 'deactivate' : 'activate')"
+                  [title]="candidate.isActive ? 'Deactivate' : 'Activate'"
+                >
+                  <i class="icon-toggle">{{ candidate.isActive ? '🔒' : '✓' }}</i>
+                </button>
+                <button (click)="deleteCandidate(candidate)" class="btn-delete" title="Delete">
+                  <i class="icon-delete">🗑️</i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="filteredCandidates.length === 0" class="no-data">
+          <p>No candidates found matching your criteria.</p>
+        </div>
+      </div>
+
+      <!-- View Details Modal -->
+      <div *ngIf="selectedCandidate" class="modal-overlay" (click)="closeModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Candidate Details</h3>
+            <button class="close-btn" (click)="closeModal()">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="detail-row">
+              <span class="label">Full Name:</span>
+              <span class="value">{{ selectedCandidate.fullName }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Email:</span>
+              <span class="value">{{ selectedCandidate.email }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Phone:</span>
+              <span class="value">{{ selectedCandidate.phoneNumber }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Experience:</span>
+              <span class="value">{{ selectedCandidate.experienceYears }} years</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Skills:</span>
+              <span class="value">{{ selectedCandidate.skills }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Resume:</span>
+              <span class="value">
+                <a [href]="selectedCandidate.resumeLink" target="_blank" class="resume-link">
+                  View Resume
+                </a>
+              </span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Status:</span>
+              <span class="value">
+                <span [class]="'status-badge ' + (selectedCandidate.isActive ? 'active' : 'inactive')">
+                  {{ selectedCandidate.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Joined:</span>
+              <span class="value">{{ selectedCandidate.createdAt | date:'medium' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>

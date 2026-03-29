@@ -1,0 +1,147 @@
+<div class="schedule-container">
+  <div class="form-header">
+    <button class="btn-back" [routerLink]="['/company/application', applicationId]">
+      ← Back to Application
+    </button>
+    <h1>Schedule Interview</h1>
+    <p *ngIf="application">
+      Schedule an interview with <strong>{{ application.candidateName }}</strong> for 
+      <strong>{{ application.jobTitle }}</strong>
+    </p>
+  </div>
+
+  <!-- Candidate Info Card -->
+  <div *ngIf="application" class="candidate-card">
+    <div class="candidate-avatar">
+      {{ application.candidateName?.charAt(0) }}
+    </div>
+    <div class="candidate-info">
+      <h3>{{ application.candidateName }}</h3>
+      <p>📧 {{ application.candidateEmail }}</p>
+      <p *ngIf="application.candidatePhone">📱 {{ application.candidatePhone }}</p>
+    </div>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    ✓ {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-error">
+    ✗ {{ errorMessage }}
+  </div>
+
+  <!-- Interview Form -->
+  <form [formGroup]="interviewForm" (ngSubmit)="onSubmit()" class="interview-form">
+    <!-- Interview Mode -->
+    <div class="form-group">
+      <label for="mode">Interview Mode *</label>
+      <div class="mode-options">
+        <label class="mode-option" *ngFor="let mode of modes">
+          <input
+            type="radio"
+            name="mode"
+            [value]="mode"
+            formControlName="mode"
+          />
+          <div class="mode-card">
+            <span class="mode-icon">{{ mode === 'Online' ? '💻' : '🏢' }}</span>
+            <span class="mode-label">{{ mode }}</span>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Date and Time -->
+    <div class="form-row">
+      <div class="form-group">
+        <label for="scheduledDate">Interview Date *</label>
+        <input
+          type="date"
+          id="scheduledDate"
+          formControlName="scheduledDate"
+          class="form-control"
+          [min]="getMinDate()"
+          [class.invalid]="submitted && f['scheduledDate'].errors"
+        />
+        <div *ngIf="submitted && f['scheduledDate'].errors" class="error-message">
+          <span *ngIf="f['scheduledDate'].errors['required']">Date is required</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="scheduledTime">Interview Time *</label>
+        <input
+          type="time"
+          id="scheduledTime"
+          formControlName="scheduledTime"
+          class="form-control"
+          [class.invalid]="submitted && f['scheduledTime'].errors"
+        />
+        <div *ngIf="submitted && f['scheduledTime'].errors" class="error-message">
+          <span *ngIf="f['scheduledTime'].errors['required']">Time is required</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Location -->
+    <div class="form-group">
+      <label for="location">
+        Location 
+        <span *ngIf="interviewForm.value.mode === 'Onsite'">*</span>
+        <span class="label-hint" *ngIf="interviewForm.value.mode === 'Online'">
+          (e.g., Zoom link, Google Meet link)
+        </span>
+      </label>
+      <input
+        type="text"
+        id="location"
+        formControlName="location"
+        class="form-control"
+        [placeholder]="interviewForm.value.mode === 'Online' 
+          ? 'Enter meeting link or platform details' 
+          : 'Enter office address or meeting room'"
+        [class.invalid]="submitted && f['location'].errors"
+      />
+      <div *ngIf="submitted && f['location'].errors" class="error-message">
+        <span *ngIf="f['location'].errors['required']">Location is required for onsite interviews</span>
+      </div>
+    </div>
+
+    <!-- Additional Notes -->
+    <div class="form-group">
+      <label for="notes">Additional Notes (Optional)</label>
+      <textarea
+        id="notes"
+        formControlName="notes"
+        class="form-control"
+        rows="4"
+        placeholder="Add any additional information or instructions for the candidate..."
+      ></textarea>
+    </div>
+
+    <!-- Important Notice -->
+    <div class="notice-box">
+      <div class="notice-icon">ℹ️</div>
+      <div class="notice-content">
+        <strong>Important:</strong> The candidate will be notified via email about the interview 
+        details. Please ensure all information is correct before scheduling.
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="onCancel()"
+        [disabled]="loading"
+      >
+        Cancel
+      </button>
+      <button type="submit" class="btn-primary" [disabled]="loading">
+        <span *ngIf="!loading">📅 Schedule Interview</span>
+        <span *ngIf="loading">Scheduling...</span>
+      </button>
+    </div>
+  </form>
+</div>

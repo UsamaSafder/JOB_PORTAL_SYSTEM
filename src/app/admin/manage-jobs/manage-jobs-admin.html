@@ -1,0 +1,208 @@
+<div class="manage-jobs">
+      <div class="header">
+        <h2>Manage Jobs</h2>
+        <div class="search-filter">
+          <input 
+            type="text" 
+            [(ngModel)]="searchTerm" 
+            (input)="filterJobs()"
+            placeholder="Search by title, company, or location..."
+            class="search-input"
+          />
+          <select [(ngModel)]="filterType" (change)="filterJobs()" class="filter-select">
+            <option value="all">All Types</option>
+            <option value="Full-time">Full-time</option>
+            <option value="Part-time">Part-time</option>
+            <option value="Internship">Internship</option>
+            <option value="Contract">Contract</option>
+          </select>
+          <select [(ngModel)]="filterStatus" (change)="filterJobs()" class="filter-select">
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stats-cards">
+        <div class="stat-card total">
+          <h3>Total Jobs</h3>
+          <p class="stat-number">{{ jobs.length }}</p>
+        </div>
+        <div class="stat-card active">
+          <h3>Active Jobs</h3>
+          <p class="stat-number">{{ getActiveJobs() }}</p>
+        </div>
+        <div class="stat-card applications">
+          <h3>Total Applications</h3>
+          <p class="stat-number">{{ getTotalApplications() }}</p>
+        </div>
+        <div class="stat-card fulltime">
+          <h3>Full-time Positions</h3>
+          <p class="stat-number">{{ getJobsByType('Full-time') }}</p>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="jobs-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Job Title</th>
+              <th>Company</th>
+              <th>Location</th>
+              <th>Type</th>
+              <th>Salary Range</th>
+              <th>Applications</th>
+              <th>Deadline</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let job of filteredJobs">
+              <td>{{ job.jobId }}</td>
+              <td>
+                <div class="job-title">
+                  <strong>{{ job.title }}</strong>
+                </div>
+              </td>
+              <td>{{ job.companyName }}</td>
+              <td>{{ job.location }}</td>
+              <td>
+                <span [class]="'type-badge ' + job.employmentType.toLowerCase()">
+                  {{ job.employmentType }}
+                </span>
+              </td>
+              <td>{{ job.salaryRange }}</td>
+              <td class="text-center">
+                <span class="applications-count">{{ job.applicationsCount || 0 }}</span>
+              </td>
+              <td>
+                <span [class]="'deadline ' + (isDeadlineNear(job.deadline) ? 'near' : '')">
+                  {{ job.deadline | date:'shortDate' }}
+                </span>
+              </td>
+              <td>
+                <span [class]="'status-badge ' + (job.isActive ? 'active' : 'inactive')">
+                  {{ job.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td class="actions">
+                <button (click)="viewJob(job)" class="btn-view" title="View Details">
+                  <i class="icon">👁️</i>
+                </button>
+                <button 
+                  (click)="toggleStatus(job)" 
+                  [class]="'btn-toggle ' + (job.isActive ? 'deactivate' : 'activate')"
+                  [title]="job.isActive ? 'Deactivate' : 'Activate'"
+                >
+                  <i class="icon">{{ job.isActive ? '🔒' : '✓' }}</i>
+                </button>
+                <button (click)="deleteJob(job)" class="btn-delete" title="Delete">
+                  <i class="icon">🗑️</i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="filteredJobs.length === 0" class="no-data">
+          <p>No jobs found matching your criteria.</p>
+        </div>
+      </div>
+
+      <!-- View Details Modal -->
+      <div *ngIf="selectedJob" class="modal-overlay" (click)="closeModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Job Details</h3>
+            <button class="close-btn" (click)="closeModal()">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="detail-section">
+              <h4>Job Information</h4>
+              <div class="detail-row">
+                <span class="label">Job Title:</span>
+                <span class="value"><strong>{{ selectedJob.title }}</strong></span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Company:</span>
+                <span class="value">{{ selectedJob.companyName }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Location:</span>
+                <span class="value">{{ selectedJob.location }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Employment Type:</span>
+                <span class="value">
+                  <span [class]="'type-badge ' + selectedJob.employmentType.toLowerCase()">
+                    {{ selectedJob.employmentType }}
+                  </span>
+                </span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Salary Range:</span>
+                <span class="value">{{ selectedJob.salaryRange }}</span>
+              </div>
+            </div>
+
+            <div class="detail-section">
+              <h4>Job Description</h4>
+              <p class="description">{{ selectedJob.description }}</p>
+            </div>
+
+            <div class="detail-section">
+              <h4>Requirements</h4>
+              <p class="description">{{ selectedJob.requirements }}</p>
+            </div>
+
+            <div class="detail-section">
+              <h4>Application Details</h4>
+              <div class="detail-row">
+                <span class="label">Total Applications:</span>
+                <span class="value">
+                  <span class="applications-count large">{{ selectedJob.applicationsCount || 0 }}</span>
+                </span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Application Deadline:</span>
+                <span class="value">
+                  <span [class]="'deadline ' + (isDeadlineNear(selectedJob.deadline) ? 'near' : '')">
+                    {{ selectedJob.deadline | date:'fullDate' }}
+                  </span>
+                </span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Posted On:</span>
+                <span class="value">{{ selectedJob.postedAt | date:'medium' }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Status:</span>
+                <span class="value">
+                  <span [class]="'status-badge ' + (selectedJob.isActive ? 'active' : 'inactive')">
+                    {{ selectedJob.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            <div class="modal-actions">
+              <button 
+                (click)="viewApplications(selectedJob)" 
+                class="btn-action applications"
+              >
+                View Applications ({{ selectedJob.applicationsCount || 0 }})
+              </button>
+              <button 
+                (click)="toggleStatus(selectedJob)" 
+                [class]="'btn-action ' + (selectedJob.isActive ? 'deactivate' : 'activate')"
+              >
+                {{ selectedJob.isActive ? 'Deactivate Job' : 'Activate Job' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
