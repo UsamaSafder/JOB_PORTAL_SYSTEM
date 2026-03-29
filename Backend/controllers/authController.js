@@ -1,8 +1,11 @@
 const Candidate = require('../models/Candidate');
 const Company = require('../models/Company');
+const User = require('../models/User');
+const Job = require('../models/Job');
+const Application = require('../models/Application');
+const Admin = require('../models/Admin');
 const { convertToCamelCase } = require('../utils/helper');
 const jwt = require('jsonwebtoken');
-const { getPool, sql } = require('../config/database');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
@@ -26,12 +29,8 @@ exports.register = async (req, res) => {
 
     console.log('Registration request received:', { email, role });
 
-    // Check directly against the Users table first — catches orphaned rows too
-    const pool = await getPool();
-    const userCheck = await pool.request()
-      .input('email', sql.NVarChar, email)
-      .query('SELECT id FROM Users WHERE email = @email');
-    if (userCheck.recordset.length > 0) {
+    const existingUser = await User.findByEmail(email);
+    if (existingUser) {
       return res.status(400).json({ error: 'Email already registered' });
     }
 
@@ -120,8 +119,7 @@ exports.register = async (req, res) => {
 
   } catch (error) {
     console.error('Registration error:', error);
-    // SQL Server duplicate key violation — email already exists
-    if (error.number === 2627 || error.number === 2601 || (error.originalError && (error.originalError.code === 2627 || error.originalError.code === 2601))) {
+    if (String(error.message || '').toLowerCase().includes('duplicate')) {
       return res.status(400).json({ error: 'Email already registered' });
     }
     res.status(500).json({ 
@@ -258,7 +256,7 @@ exports.getProfile = async (req, res) => {
 
     let user;
     if (role === 'candidate') {
-      user = await Candidate.findById(userId);
+      user = await Candidate.findByUserId(userId);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -276,7 +274,7 @@ exports.getProfile = async (req, res) => {
         }
       });
     } else {
-      user = await Company.findById(userId);
+      user = await Company.findByUserId(userId);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -306,25 +304,20 @@ exports.getProfile = async (req, res) => {
 exports.changePassword = async (req, res) => {
   try {
     const userId = req.user.id;
-    const role = req.user.role;
     const { currentPassword, newPassword } = req.body;
 
-    // Get user
-    let user;
-    const Model = role === 'candidate' ? Candidate : Company;
-    
-    user = await Model.findById(userId);
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     // Verify current password
-    const isPasswordValid = await Model.comparePassword(currentPassword, user.PasswordHash);
+    const isPasswordValid = await User.comparePassword(currentPassword, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Current password is incorrect' });
     }
 
-    // Update password (you'll need to add an update method to models)
+    await User.update(userId, { password: newPassword });
     res.json({ message: 'Password changed successfully' });
 
   } catch (error) {
@@ -346,11 +339,6 @@ exports.logout = async (req, res) => {
 // Initialize test users (for development only)
 exports.initializeTestUsers = async (req, res) => {
   try {
-    const { getPool, sql } = require('../config/database');
-    const bcrypt = require('bcryptjs');
-
-    const pool = await getPool();
-
     console.log('Initializing test users...');
 
     const testUsers = [
@@ -385,160 +373,58 @@ exports.initializeTestUsers = async (req, res) => {
 
     const createdUsers = [];
 
-    // Create candidate
     const candidateUser = testUsers[0];
-    const candidateHashedPassword = await bcrypt.hash(candidateUser.password, 10);
-    
     try {
-      const candidateUserResult = await pool.request()
-        .input('email', sql.NVarChar, candidateUser.email)
-        .input('password', sql.NVarChar, candidateHashedPassword)
-        .input('role', sql.NVarChar, 'candidate')
-        .query(`
-          IF NOT EXISTS (SELECT 1 FROM Users WHERE email = @email)
-          BEGIN
-            INSERT INTO Users (email, password, role, isActive, isVerified)
-            OUTPUT INSERTED.*
-            VALUES (@email, @password, @role, 1, 1)
-          END
-          ELSE
-          BEGIN
-            SELECT * FROM Users WHERE email = @email
-          END
-        `);
-
-      const candidateUserRecord = candidateUserResult.recordset[0];
-      if (candidateUserRecord) {
-        const candidateResult = await pool.request()
-          .input('userId', sql.Int, candidateUserRecord.id)
-          .input('fullName', sql.NVarChar, `${candidateUser.firstName} ${candidateUser.lastName}`)
-          .input('phone', sql.NVarChar, candidateUser.phone)
-          .input('skills', sql.NVarChar(sql.MAX), candidateUser.skills)
-          .input('experienceYears', sql.Int, candidateUser.experienceYears)
-          .query(`
-            IF NOT EXISTS (SELECT 1 FROM Candidates WHERE userId = @userId)
-            BEGIN
-              INSERT INTO Candidates (userId, FullName, PhoneNumber, Skills, ExperienceYears)
-              OUTPUT INSERTED.*
-              VALUES (@userId, @fullName, @phone, @skills, @experienceYears)
-            END
-            ELSE
-            BEGIN
-              SELECT * FROM Candidates WHERE userId = @userId
-            END
-          `);
-
-        createdUsers.push({
+      let candidate = await Candidate.findByEmail(candidateUser.email);
+      if (!candidate) {
+        candidate = await Candidate.create({
+          fullName: `${candidateUser.firstName} ${candidateUser.lastName}`,
           email: candidateUser.email,
           password: candidateUser.password,
-          role: 'candidate'
+          phone: candidateUser.phone,
+          skills: candidateUser.skills,
+          experienceYears: candidateUser.experienceYears
         });
       }
+      createdUsers.push({ email: candidateUser.email, password: candidateUser.password, role: 'candidate' });
     } catch (err) {
       console.error('Error creating candidate test user:', err.message);
     }
 
-    // Create company
     const companyUser = testUsers[1];
-    const companyHashedPassword = await bcrypt.hash(companyUser.password, 10);
-    
     try {
-      const companyUserResult = await pool.request()
-        .input('email', sql.NVarChar, companyUser.email)
-        .input('password', sql.NVarChar, companyHashedPassword)
-        .input('role', sql.NVarChar, 'company')
-        .query(`
-          IF NOT EXISTS (SELECT 1 FROM Users WHERE email = @email)
-          BEGIN
-            INSERT INTO Users (email, password, role, isActive, isVerified)
-            OUTPUT INSERTED.*
-            VALUES (@email, @password, @role, 1, 1)
-          END
-          ELSE
-          BEGIN
-            SELECT * FROM Users WHERE email = @email
-          END
-        `);
-
-      const companyUserRecord = companyUserResult.recordset[0];
-      if (companyUserRecord) {
-        const companyResult = await pool.request()
-          .input('userId', sql.Int, companyUserRecord.id)
-          .input('companyName', sql.NVarChar, companyUser.companyName)
-          .input('phone', sql.NVarChar, companyUser.phone)
-          .input('industry', sql.NVarChar, companyUser.industry)
-          .input('location', sql.NVarChar, companyUser.location)
-          .input('website', sql.NVarChar, companyUser.website)
-          .input('description', sql.NVarChar(sql.MAX), companyUser.description)
-          .query(`
-            IF NOT EXISTS (SELECT 1 FROM Companies WHERE userId = @userId)
-            BEGIN
-              INSERT INTO Companies (userId, CompanyName, PhoneNumber, Industry, Location, Website, Description, IsVerified)
-              OUTPUT INSERTED.*
-              VALUES (@userId, @companyName, @phone, @industry, @location, @website, @description, 1)
-            END
-            ELSE
-            BEGIN
-              SELECT * FROM Companies WHERE userId = @userId
-            END
-          `);
-
-        createdUsers.push({
+      let company = await Company.findByEmail(companyUser.email);
+      if (!company) {
+        company = await Company.create({
+          companyName: companyUser.companyName,
           email: companyUser.email,
           password: companyUser.password,
-          role: 'company'
+          phone: companyUser.phone,
+          industry: companyUser.industry,
+          location: companyUser.location,
+          website: companyUser.website,
+          description: companyUser.description,
+          isVerified: true
         });
       }
+      await User.update(company.userId, { isVerified: true });
+      await Company.update(company.CompanyID, { isVerified: true });
+      createdUsers.push({ email: companyUser.email, password: companyUser.password, role: 'company' });
     } catch (err) {
       console.error('Error creating company test user:', err.message);
     }
 
-    // Create admin
     const adminUser = testUsers[2];
-    const adminHashedPassword = await bcrypt.hash(adminUser.password, 10);
-    
     try {
-      const adminUserResult = await pool.request()
-        .input('email', sql.NVarChar, adminUser.email)
-        .input('password', sql.NVarChar, adminHashedPassword)
-        .input('role', sql.NVarChar, 'admin')
-        .query(`
-          IF NOT EXISTS (SELECT 1 FROM Users WHERE email = @email)
-          BEGIN
-            INSERT INTO Users (email, password, role, isActive, isVerified)
-            OUTPUT INSERTED.*
-            VALUES (@email, @password, @role, 1, 1)
-          END
-          ELSE
-          BEGIN
-            SELECT * FROM Users WHERE email = @email
-          END
-        `);
-
-      const adminUserRecord = adminUserResult.recordset[0];
-      if (adminUserRecord) {
-        const adminResult = await pool.request()
-          .input('userId', sql.Int, adminUserRecord.id)
-          .input('username', sql.NVarChar, adminUser.username)
-          .query(`
-            IF NOT EXISTS (SELECT 1 FROM Admins WHERE userId = @userId)
-            BEGIN
-              INSERT INTO Admins (userId, Username)
-              OUTPUT INSERTED.*
-              VALUES (@userId, @username)
-            END
-            ELSE
-            BEGIN
-              SELECT * FROM Admins WHERE userId = @userId
-            END
-          `);
-
-        createdUsers.push({
+      let admin = await Admin.findByEmail(adminUser.email);
+      if (!admin) {
+        admin = await Admin.create({
           email: adminUser.email,
           password: adminUser.password,
-          role: 'admin'
+          username: adminUser.username
         });
       }
+      createdUsers.push({ email: adminUser.email, password: adminUser.password, role: 'admin' });
     } catch (err) {
       console.error('Error creating admin test user:', err.message);
     }
@@ -562,24 +448,10 @@ exports.initializeTestUsers = async (req, res) => {
 // Initialize test data (jobs and applications)
 exports.initializeTestData = async (req, res) => {
   try {
-    const { getPool, sql } = require('../config/database');
-    const pool = await getPool();
-
     console.log('Initializing test data (jobs and applications)...');
 
-    // First, get test company and candidate IDs
-    console.log('Fetching test company...');
-    const companyResult = await pool.request()
-      .input('email', sql.NVarChar, 'test.company@example.com')
-      .query('SELECT c.CompanyID, c.userId FROM Companies c INNER JOIN Users u ON c.userId = u.id WHERE u.email = @email');
-    
-    console.log('Fetching test candidate...');
-    const candidateResult = await pool.request()
-      .input('email', sql.NVarChar, 'test.candidate@example.com')
-      .query('SELECT c.CandidateID, c.userId FROM Candidates c INNER JOIN Users u ON c.userId = u.id WHERE u.email = @email');
-    
-    const testCompany = companyResult.recordset[0];
-    const testCandidate = candidateResult.recordset[0];
+    const testCompany = await Company.findByEmail('test.company@example.com');
+    const testCandidate = await Candidate.findByEmail('test.candidate@example.com');
 
     console.log('Test company:', testCompany);
     console.log('Test candidate:', testCandidate);
@@ -632,23 +504,19 @@ exports.initializeTestData = async (req, res) => {
     for (const job of testJobs) {
       try {
         console.log(`Creating job: ${job.title} for CompanyID: ${testCompany.CompanyID}`);
-        
-        const jobResult = await pool.request()
-          .input('companyId', sql.Int, testCompany.CompanyID)
-          .input('title', sql.NVarChar, job.title)
-          .input('description', sql.NVarChar(sql.MAX), job.description)
-          .input('location', sql.NVarChar, job.location)
-          .input('salaryRange', sql.NVarChar, job.salaryRange)
-          .input('requirements', sql.NVarChar(sql.MAX), job.requirements)
-          .input('employmentType', sql.NVarChar, job.employmentType)
-          .input('deadline', sql.Date, new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)) // 30 days from now
-          .query(`
-            INSERT INTO Jobs (CompanyID, Title, Description, Location, SalaryRange, Requirements, EmploymentType, Deadline, IsActive, PostedAt)
-            OUTPUT INSERTED.JobID
-            VALUES (@companyId, @title, @description, @location, @salaryRange, @requirements, @employmentType, @deadline, 1, GETDATE())
-          `);
 
-        const jobId = jobResult.recordset[0]?.JobID;
+        const createdJob = await Job.create({
+          companyId: testCompany.CompanyID,
+          title: job.title,
+          description: job.description,
+          location: job.location,
+          salaryRange: job.salaryRange,
+          requirements: job.requirements,
+          employmentType: job.employmentType,
+          deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        });
+
+        const jobId = createdJob?.JobID;
         console.log(`Job created with ID: ${jobId}`);
         
         if (jobId) {
@@ -659,18 +527,14 @@ exports.initializeTestData = async (req, res) => {
           for (let i = 0; i < statuses.length; i++) {
             try {
               console.log(`Creating application for JobID: ${jobId}, CandidateID: ${testCandidate.CandidateID}, Status: ${statuses[i]}`);
-              
-              const appResult = await pool.request()
-                .input('jobId', sql.Int, jobId)
-                .input('candidateId', sql.Int, testCandidate.CandidateID)
-                .input('status', sql.NVarChar, statuses[i])
-                .query(`
-                  INSERT INTO Applications (JobID, CandidateID, Status, AppliedAt)
-                  OUTPUT INSERTED.ApplicationID
-                  VALUES (@jobId, @candidateId, @status, GETDATE())
-                `);
 
-              const appId = appResult.recordset[0]?.ApplicationID;
+              const app = await Application.create({
+                jobId,
+                candidateId: testCandidate.CandidateID,
+                coverLetter: null
+              });
+              const updated = await Application.update(app.ApplicationID, { status: statuses[i] });
+              const appId = updated?.ApplicationID || app.ApplicationID;
               console.log(`Application created with ID: ${appId}`);
               
               createdApplications.push({ 

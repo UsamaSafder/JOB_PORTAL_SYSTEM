@@ -1,128 +1,59 @@
-const { getPool, sql } = require('../config/database');
+const { NotificationDoc, nextSequence, toPlain } = require('./mongoCollections');
 
 class Notification {
   static async create(notificationData) {
-    try {
-      const pool = await getPool();
-      
-      const result = await pool.request()
-        .input('userId', sql.Int, notificationData.userId)
-        .input('title', sql.NVarChar, notificationData.title || 'Notification')
-        .input('message', sql.NVarChar(sql.MAX), notificationData.message)
-        .input('type', sql.NVarChar, notificationData.type || 'info')
-        .input('link', sql.NVarChar, notificationData.link || null)
-        .query(`
-          INSERT INTO Notifications (userId, Title, Message, Type, Link, IsRead)
-          OUTPUT INSERTED.*
-          VALUES (@userId, @title, @message, @type, @link, 0)
-        `);
-      
-      return result.recordset[0];
-    } catch (err) {
-      throw err;
-    }
+    const notification = await NotificationDoc.create({
+      NotificationID: await nextSequence('Notifications.NotificationID'),
+      userId: Number(notificationData.userId),
+      Title: notificationData.title || 'Notification',
+      Message: notificationData.message,
+      Type: notificationData.type || 'info',
+      Link: notificationData.link || null,
+      IsRead: false
+    });
+
+    return toPlain(notification);
   }
 
   static async findById(notificationId) {
-    try {
-      const pool = await getPool();
-      const result = await pool.request()
-        .input('notificationId', sql.Int, notificationId)
-        .query('SELECT * FROM Notifications WHERE NotificationID = @notificationId');
-      
-      return result.recordset[0];
-    } catch (err) {
-      throw err;
-    }
+    const doc = await NotificationDoc.findOne({ NotificationID: Number(notificationId) }).lean();
+    return toPlain(doc);
   }
 
   static async findByUserId(userId, limit = 50) {
-    try {
-      const pool = await getPool();
-      const result = await pool.request()
-        .input('userId', sql.Int, userId)
-        .input('limit', sql.Int, limit)
-        .query(`
-          SELECT TOP (@limit) * 
-          FROM Notifications 
-          WHERE userId = @userId 
-          ORDER BY CreatedAt DESC
-        `);
-      
-      return result.recordset;
-    } catch (err) {
-      throw err;
-    }
+    const docs = await NotificationDoc.find({ userId: Number(userId) })
+      .sort({ CreatedAt: -1 })
+      .limit(Number(limit) || 50)
+      .lean();
+    return docs.map(toPlain);
   }
 
   static async markAsRead(notificationId) {
-    try {
-      const pool = await getPool();
-      const result = await pool.request()
-        .input('notificationId', sql.Int, notificationId)
-        .query(`
-          UPDATE Notifications 
-          SET IsRead = 1 
-          OUTPUT INSERTED.*
-          WHERE NotificationID = @notificationId
-        `);
-      
-      return result.recordset[0];
-    } catch (err) {
-      throw err;
-    }
+    const doc = await NotificationDoc.findOneAndUpdate(
+      { NotificationID: Number(notificationId) },
+      { $set: { IsRead: true } },
+      { new: true }
+    ).lean();
+    return toPlain(doc);
   }
 
   static async markAllAsRead(userId) {
-    try {
-      const pool = await getPool();
-      await pool.request()
-        .input('userId', sql.Int, userId)
-        .query('UPDATE Notifications SET IsRead = 1 WHERE userId = @userId AND IsRead = 0');
-      
-      return true;
-    } catch (err) {
-      throw err;
-    }
+    await NotificationDoc.updateMany({ userId: Number(userId), IsRead: false }, { $set: { IsRead: true } });
+    return true;
   }
 
   static async getUnreadCount(userId) {
-    try {
-      const pool = await getPool();
-      const result = await pool.request()
-        .input('userId', sql.Int, userId)
-        .query('SELECT COUNT(*) as unreadCount FROM Notifications WHERE userId = @userId AND IsRead = 0');
-      
-      return result.recordset[0].unreadCount;
-    } catch (err) {
-      throw err;
-    }
+    return NotificationDoc.countDocuments({ userId: Number(userId), IsRead: false });
   }
 
   static async delete(notificationId) {
-    try {
-      const pool = await getPool();
-      await pool.request()
-        .input('notificationId', sql.Int, notificationId)
-        .query('DELETE FROM Notifications WHERE NotificationID = @notificationId');
-      
-      return true;
-    } catch (err) {
-      throw err;
-    }
+    await NotificationDoc.deleteOne({ NotificationID: Number(notificationId) });
+    return true;
   }
 
   static async deleteAll(userId) {
-    try {
-      const pool = await getPool();
-      await pool.request()
-        .input('userId', sql.Int, userId)
-        .query('DELETE FROM Notifications WHERE userId = @userId');
-      
-      return true;
-    } catch (err) {
-      throw err;
-    }
+    await NotificationDoc.deleteMany({ userId: Number(userId) });
+    return true;
   }
 }
 

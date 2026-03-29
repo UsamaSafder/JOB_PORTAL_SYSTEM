@@ -1,124 +1,119 @@
-const { getPool, sql } = require('../config/database');
+const { ApplicationDoc, JobDoc, CandidateDoc, CompanyDoc, UserDoc, InterviewDoc, nextSequence, toPlain } = require('./mongoCollections');
 
 class Application {
   static async create(applicationData) {
-    try {
-      const pool = await getPool();
-      
-      const result = await pool.request()
-        .input('jobId', sql.Int, applicationData.jobId)
-        .input('candidateId', sql.Int, applicationData.candidateId)
-        .input('coverLetter', sql.NVarChar(sql.MAX), applicationData.coverLetter || null)
-        .input('resumePath', sql.NVarChar, applicationData.resumePath || null)
-        .query(`
-          INSERT INTO Applications (JobID, CandidateID, CoverLetter, AppliedAt, Status)
-          OUTPUT INSERTED.*
-          VALUES (@jobId, @candidateId, @coverLetter, GETDATE(), 'Pending')
-        `);
-      
-      return result.recordset[0];
-    } catch (err) {
-      throw err;
-    }
+    const created = await ApplicationDoc.create({
+      ApplicationID: await nextSequence('Applications.ApplicationID'),
+      JobID: Number(applicationData.jobId),
+      CandidateID: Number(applicationData.candidateId),
+      CoverLetter: applicationData.coverLetter || null,
+      ResumePath: applicationData.resumePath || null,
+      AppliedAt: new Date(),
+      Status: 'Pending'
+    });
+
+    return toPlain(created);
   }
 
   static async findById(applicationId) {
-    try {
-      const pool = await getPool();
-      const result = await pool.request()
-        .input('applicationId', sql.Int, applicationId)
-        .query(`
-          SELECT 
-            a.*,
-            j.Title as jobTitle, 
-            j.Location as jobLocation,
-            j.SalaryRange as salaryRange,
-            j.CompanyID,
-            c.FullName as candidateName,
-            c.PhoneNumber as candidatePhone,
-            c.Skills as candidateSkills,
-            c.ExperienceYears as experienceYears,
-            c.ResumeLink as resumeLink,
-            comp.CompanyName,
-            comp.CompanyID as companyId,
-            u.email as candidateEmail
-          FROM Applications a
-          INNER JOIN Jobs j ON a.JobID = j.JobID
-          INNER JOIN Candidates c ON a.CandidateID = c.CandidateID
-          INNER JOIN Companies comp ON j.CompanyID = comp.CompanyID
-          INNER JOIN Users u ON c.userId = u.id
-          WHERE a.ApplicationID = @applicationId
-        `);
-      
-      return result.recordset[0];
-    } catch (err) {
-      throw err;
-    }
+    const app = await ApplicationDoc.findOne({ ApplicationID: Number(applicationId) }).lean();
+    if (!app) return null;
+
+    const [job, candidate] = await Promise.all([
+      JobDoc.findOne({ JobID: app.JobID }).lean(),
+      CandidateDoc.findOne({ CandidateID: app.CandidateID }).lean()
+    ]);
+    const [company, user] = await Promise.all([
+      job ? CompanyDoc.findOne({ CompanyID: job.CompanyID }).lean() : null,
+      candidate ? UserDoc.findOne({ id: candidate.userId }).lean() : null
+    ]);
+
+    return {
+      ...toPlain(app),
+      jobTitle: job?.Title,
+      jobLocation: job?.Location,
+      salaryRange: job?.SalaryRange,
+      CompanyID: job?.CompanyID,
+      candidateName: candidate?.FullName,
+      candidatePhone: candidate?.PhoneNumber,
+      candidateSkills: candidate?.Skills,
+      experienceYears: candidate?.ExperienceYears,
+      resumeLink: candidate?.ResumeLink,
+      CompanyName: company?.CompanyName,
+      companyId: company?.CompanyID,
+      candidateEmail: user?.email
+    };
   }
 
   static async findAll(filters = {}) {
     try {
-      const pool = await getPool();
-      let query = `
-        SELECT 
-          a.*,
-          j.Title as jobTitle,
-          j.Location as jobLocation,
-          j.SalaryRange as salaryRange,
-          j.CompanyID as companyId,
-          c.FullName as candidateName,
-          c.PhoneNumber as candidatePhone,
-          c.Skills as candidateSkills,
-          c.ExperienceYears as experienceYears,
-          c.ResumeLink as resumeLink,
-          comp.CompanyName,
-          u.email as candidateEmail,
-          latestInterview.ScheduledDate as interviewScheduledDate,
-          latestInterview.Location as interviewLocation,
-          latestInterview.Mode as interviewMode,
-          latestInterview.Status as interviewStatus
-        FROM Applications a
-        INNER JOIN Jobs j ON a.JobID = j.JobID
-        INNER JOIN Candidates c ON a.CandidateID = c.CandidateID
-        INNER JOIN Companies comp ON j.CompanyID = comp.CompanyID
-        INNER JOIN Users u ON c.userId = u.id
-        OUTER APPLY (
-          SELECT TOP 1 i.ScheduledDate, i.Location, i.Mode, i.Status
-          FROM Interviews i
-          WHERE i.ApplicationID = a.ApplicationID
-          ORDER BY i.ScheduledDate DESC, i.InterviewID DESC
-        ) latestInterview
-        WHERE 1=1
-      `;
-      const request = pool.request();
+      console.log('Application.findAll executing query with filters:', filters);
 
-      if (filters.candidateId) {
-        query += ` AND a.CandidateID = @candidateId`;
-        request.input('candidateId', sql.Int, filters.candidateId);
-      }
+      const query = {};
+      if (filters.candidateId) query.CandidateID = Number(filters.candidateId);
+      if (filters.jobId) query.JobID = Number(filters.jobId);
+      if (filters.status) query.Status = filters.status;
+
+      let apps = await ApplicationDoc.find(query).sort({ AppliedAt: -1 }).lean();
+
+      const jobs = await JobDoc.find({ JobID: { $in: apps.map((a) => a.JobID) } }).lean();
+      const jobMap = new Map(jobs.map((j) => [j.JobID, j]));
 
       if (filters.companyId) {
-        query += ` AND j.CompanyID = @companyId`;
-        request.input('companyId', sql.Int, filters.companyId);
+        const companyId = Number(filters.companyId);
+        apps = apps.filter((a) => jobMap.get(a.JobID)?.CompanyID === companyId);
       }
 
-      if (filters.jobId) {
-        query += ` AND a.JobID = @jobId`;
-        request.input('jobId', sql.Int, filters.jobId);
+      const candidateIds = [...new Set(apps.map((a) => a.CandidateID))];
+      const candidates = await CandidateDoc.find({ CandidateID: { $in: candidateIds } }).lean();
+      const candidateMap = new Map(candidates.map((c) => [c.CandidateID, c]));
+
+      const companyIds = [...new Set(jobs.map((j) => j.CompanyID))];
+      const companies = await CompanyDoc.find({ CompanyID: { $in: companyIds } }).lean();
+      const companyMap = new Map(companies.map((c) => [c.CompanyID, c]));
+
+      const users = await UserDoc.find({ id: { $in: candidates.map((c) => c.userId) } }).lean();
+      const userMap = new Map(users.map((u) => [u.id, u]));
+
+      const appIds = apps.map((a) => a.ApplicationID);
+      const interviews = await InterviewDoc.find({ ApplicationID: { $in: appIds } }).sort({ ScheduledDate: -1, InterviewID: -1 }).lean();
+      const latestInterviewMap = new Map();
+      for (const interview of interviews) {
+        if (!latestInterviewMap.has(interview.ApplicationID)) {
+          latestInterviewMap.set(interview.ApplicationID, interview);
+        }
       }
 
-      if (filters.status) {
-        query += ` AND a.Status = @status`;
-        request.input('status', sql.NVarChar, filters.status);
-      }
+      const output = apps.map((app) => {
+        const job = jobMap.get(app.JobID);
+        const candidate = candidateMap.get(app.CandidateID);
+        const company = companyMap.get(job?.CompanyID);
+        const user = userMap.get(candidate?.userId);
+        const latestInterview = latestInterviewMap.get(app.ApplicationID);
 
-      query += ` ORDER BY a.AppliedAt DESC`;
-      
-      console.log('Application.findAll executing query with filters:', filters);
-      
-      const result = await request.query(query);
-      console.log('Application.findAll result count:', result.recordset.length);
-      return result.recordset;
+        return {
+          ...toPlain(app),
+          jobTitle: job?.Title,
+          jobLocation: job?.Location,
+          salaryRange: job?.SalaryRange,
+          companyId: job?.CompanyID,
+          CompanyID: job?.CompanyID,
+          candidateName: candidate?.FullName,
+          candidatePhone: candidate?.PhoneNumber,
+          candidateSkills: candidate?.Skills,
+          experienceYears: candidate?.ExperienceYears,
+          resumeLink: candidate?.ResumeLink,
+          CompanyName: company?.CompanyName,
+          candidateEmail: user?.email,
+          interviewScheduledDate: latestInterview?.ScheduledDate || null,
+          interviewLocation: latestInterview?.Location || null,
+          interviewMode: latestInterview?.Mode || null,
+          interviewStatus: latestInterview?.Status || null
+        };
+      });
+
+      console.log('Application.findAll result count:', output.length);
+      return output;
     } catch (err) {
       console.error('Application.findAll error:', err.message);
       console.error('Application.findAll stack:', err.stack);
@@ -127,67 +122,28 @@ class Application {
   }
 
   static async update(applicationId, applicationData) {
-    try {
-      const pool = await getPool();
-      const request = pool.request();
-      let updateFields = [];
-      
-      if (applicationData.status) {
-        updateFields.push('Status = @status');
-        request.input('status', sql.NVarChar, applicationData.status);
-      }
-      
-      if (applicationData.coverLetter !== undefined) {
-        updateFields.push('CoverLetter = @coverLetter');
-        request.input('coverLetter', sql.NVarChar(sql.MAX), applicationData.coverLetter);
-      }
+    const updatePayload = { UpdatedAt: new Date() };
+    if (applicationData.status) updatePayload.Status = applicationData.status;
+    if (applicationData.coverLetter !== undefined) updatePayload.CoverLetter = applicationData.coverLetter;
+    if (applicationData.notes !== undefined) updatePayload.Notes = applicationData.notes;
 
-      if (applicationData.notes !== undefined) {
-        updateFields.push('Notes = @notes');
-        request.input('notes', sql.NVarChar(sql.MAX), applicationData.notes);
-      }
-      
-      updateFields.push('UpdatedAt = GETDATE()');
-      
-      request.input('applicationId', sql.Int, applicationId);
-      const query = `UPDATE Applications SET ${updateFields.join(', ')} OUTPUT INSERTED.* WHERE ApplicationID = @applicationId`;
-      
-      const result = await request.query(query);
-      return result.recordset[0];
-    } catch (err) {
-      throw err;
-    }
+    const updated = await ApplicationDoc.findOneAndUpdate(
+      { ApplicationID: Number(applicationId) },
+      { $set: updatePayload },
+      { new: true }
+    ).lean();
+
+    return toPlain(updated);
   }
 
   static async delete(applicationId) {
-    try {
-      const pool = await getPool();
-      await pool.request()
-        .input('applicationId', sql.Int, applicationId)
-        .query('DELETE FROM Applications WHERE ApplicationID = @applicationId');
-      
-      return true;
-    } catch (err) {
-      throw err;
-    }
+    await ApplicationDoc.deleteOne({ ApplicationID: Number(applicationId) });
+    return true;
   }
 
   static async checkDuplicate(jobId, candidateId) {
-    try {
-      const pool = await getPool();
-      const result = await pool.request()
-        .input('jobId', sql.Int, jobId)
-        .input('candidateId', sql.Int, candidateId)
-        .query(`
-          SELECT ApplicationID as id 
-          FROM Applications 
-          WHERE JobID = @jobId AND CandidateID = @candidateId
-        `);
-      
-      return result.recordset[0];
-    } catch (err) {
-      throw err;
-    }
+    const app = await ApplicationDoc.findOne({ JobID: Number(jobId), CandidateID: Number(candidateId) }, { ApplicationID: 1 }).lean();
+    return app ? { id: app.ApplicationID } : null;
   }
 }
 

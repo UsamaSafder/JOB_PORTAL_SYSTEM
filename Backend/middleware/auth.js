@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
-const { getPool, sql } = require('../config/database');
+const User = require('../models/User');
+const Company = require('../models/Company');
+const Candidate = require('../models/Candidate');
 
 const auth = async (req, res, next) => {
   try {
@@ -15,14 +17,8 @@ const auth = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log('Token decoded payload:', { id: decoded.id, role: decoded.role });
 
-    // Token always contains userId (from Users table) and role
-    // Use the userId directly to fetch the user record
-    const pool = await getPool();
-    const userResult = await pool.request()
-      .input('userId', sql.Int, decoded.id)
-      .query('SELECT * FROM Users WHERE id = @userId');
-
-    let userRow = userResult.recordset[0];
+    // Token always contains userId and role.
+    const userRow = await User.findById(decoded.id);
 
     if (!userRow) {
       return res.status(401).json({ error: 'User not found' });
@@ -46,26 +42,20 @@ const auth = async (req, res, next) => {
     let candidateId = null;
 
     if (userRole === 'company') {
-      const comp = await pool.request()
-        .input('userId', sql.Int, decoded.id)
-        .query('SELECT CompanyID FROM Companies WHERE userId = @userId');
-      
-      console.log('Company lookup result:', comp.recordset);
-      
-      if (comp.recordset[0]) {
-        companyId = comp.recordset[0].CompanyID;
+      const comp = await Company.findByUserId(decoded.id);
+      console.log('Company lookup result:', comp ? [{ CompanyID: comp.CompanyID }] : []);
+
+      if (comp) {
+        companyId = comp.CompanyID;
       } else {
         console.warn('No company found for userId:', decoded.id);
       }
     } else if (userRole === 'candidate') {
-      const cand = await pool.request()
-        .input('userId', sql.Int, decoded.id)
-        .query('SELECT CandidateID FROM Candidates WHERE userId = @userId');
-      
-      console.log('Candidate lookup result:', cand.recordset);
-      
-      if (cand.recordset[0]) {
-        candidateId = cand.recordset[0].CandidateID;
+      const cand = await Candidate.findByUserId(decoded.id);
+      console.log('Candidate lookup result:', cand ? [{ CandidateID: cand.CandidateID }] : []);
+
+      if (cand) {
+        candidateId = cand.CandidateID;
       } else {
         console.warn('No candidate found for userId:', decoded.id);
       }
@@ -120,15 +110,9 @@ const optionalAuth = async (req, res, next) => {
     if (token) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // Token contains userId, use it directly
-      const pool = await getPool();
-      const userResult = await pool.request()
-        .input('userId', sql.Int, decoded.id)
-        .query('SELECT * FROM Users WHERE id = @userId AND isActive = 1');
+      const userRow = await User.findById(decoded.id);
 
-      const userRow = userResult.recordset[0];
-
-      if (userRow) {
+      if (userRow && userRow.isActive) {
         // Look up additional info based on role
         let companyId = null;
         let candidateId = null;
@@ -136,21 +120,11 @@ const optionalAuth = async (req, res, next) => {
         const userRole = decoded.role || userRow.role || 'user';
 
         if (userRole === 'company') {
-          const comp = await pool.request()
-            .input('userId', sql.Int, decoded.id)
-            .query('SELECT CompanyID FROM Companies WHERE userId = @userId');
-          
-          if (comp.recordset[0]) {
-            companyId = comp.recordset[0].CompanyID;
-          }
+          const comp = await Company.findByUserId(decoded.id);
+          if (comp) companyId = comp.CompanyID;
         } else if (userRole === 'candidate') {
-          const cand = await pool.request()
-            .input('userId', sql.Int, decoded.id)
-            .query('SELECT CandidateID FROM Candidates WHERE userId = @userId');
-          
-          if (cand.recordset[0]) {
-            candidateId = cand.recordset[0].CandidateID;
-          }
+          const cand = await Candidate.findByUserId(decoded.id);
+          if (cand) candidateId = cand.CandidateID;
         }
 
         req.user = {

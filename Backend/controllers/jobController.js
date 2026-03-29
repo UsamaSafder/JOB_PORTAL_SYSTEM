@@ -3,7 +3,6 @@ const Company = require('../models/Company');
 const User = require('../models/User');
 const SystemLog = require('../models/SystemLog');
 const { convertToCamelCase } = require('../utils/helper');
-const { getPool, sql } = require('../config/database');
 
 function deriveCompanyNameFromEmail(email) {
   const local = String(email || 'company').split('@')[0] || 'company';
@@ -21,19 +20,13 @@ async function ensureCompanyByUserId(userId) {
   const user = await User.findById(userId);
   if (!user || user.role !== 'company') return null;
 
-  const pool = await getPool();
-  await pool.request()
-    .input('userId', sql.Int, userId)
-    .input('companyName', sql.NVarChar(255), deriveCompanyNameFromEmail(user.email))
-    .input('phone', sql.NVarChar(20), '00000000000')
-    .input('industry', sql.NVarChar(100), 'Other')
-    .query(`
-      INSERT INTO Companies (userId, CompanyName, PhoneNumber, Industry)
-      VALUES (@userId, @companyName, @phone, @industry)
-    `);
+  company = await Company.ensureForUser(userId, {
+    companyName: deriveCompanyNameFromEmail(user.email),
+    phone: '00000000000',
+    industry: 'Other'
+  });
 
-  company = await Company.findByUserId(userId);
-  return company || null;
+  return company;
 }
 
 const jobController = {

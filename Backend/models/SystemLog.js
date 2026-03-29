@@ -1,25 +1,20 @@
-const { getPool, sql } = require('../config/database');
+const { SystemLogDoc, UserDoc, CandidateDoc, CompanyDoc, nextSequence, toPlain } = require('./mongoCollections');
 
 class SystemLog {
   static async create(logData) {
     try {
-      const pool = await getPool();
-      
-      const result = await pool.request()
-        .input('userId', sql.Int, logData.userId || null)
-        .input('action', sql.NVarChar, logData.action)
-        .input('entity', sql.NVarChar, logData.entity || null)
-        .input('entityId', sql.Int, logData.entityId || null)
-        .input('details', sql.NVarChar(sql.MAX), logData.details || null)
-        .input('ipAddress', sql.NVarChar, logData.ipAddress || null)
-        .input('userAgent', sql.NVarChar, logData.userAgent || null)
-        .query(`
-          INSERT INTO SystemLogs (userId, Action, Entity, EntityId, Details, IpAddress, UserAgent)
-          OUTPUT INSERTED.*
-          VALUES (@userId, @action, @entity, @entityId, @details, @ipAddress, @userAgent)
-        `);
-      
-      return result.recordset[0];
+      const created = await SystemLogDoc.create({
+        LogID: await nextSequence('SystemLogs.LogID'),
+        UserId: logData.userId ? Number(logData.userId) : null,
+        Action: logData.action,
+        Entity: logData.entity || null,
+        EntityId: logData.entityId ? Number(logData.entityId) : null,
+        Details: logData.details || null,
+        IpAddress: logData.ipAddress || null,
+        UserAgent: logData.userAgent || null
+      });
+
+      return toPlain(created);
     } catch (err) {
       console.error('Error creating system log:', err);
       // Don't throw - logging should never break the application
@@ -28,95 +23,57 @@ class SystemLog {
   }
 
   static async findById(logId) {
-    try {
-      const pool = await getPool();
-      const result = await pool.request()
-        .input('logId', sql.Int, logId)
-        .query('SELECT * FROM SystemLogs WHERE LogID = @logId');
-      
-      return result.recordset[0];
-    } catch (err) {
-      throw err;
-    }
+    const doc = await SystemLogDoc.findOne({ LogID: Number(logId) }).lean();
+    return toPlain(doc);
   }
 
   static async findAll(filters = {}) {
-    try {
-      const pool = await getPool();
-      let query = `
-        SELECT 
-          sl.LogID,
-          sl.UserId,
-          sl.Action,
-          sl.Entity,
-          sl.EntityId,
-          sl.Details,
-          sl.IpAddress,
-          sl.UserAgent,
-          CONVERT(VARCHAR(30), sl.CreatedAt, 121) as Timestamp,
-          u.Email,
-          u.Role as UserType,
-          ISNULL(c.FullName, co.CompanyName) as UserName
-        FROM SystemLogs sl
-        LEFT JOIN Users u ON sl.UserId = u.id
-        LEFT JOIN Candidates c ON u.id = c.userId
-        LEFT JOIN Companies co ON u.id = co.userId
-        WHERE 1=1
-      `;
-      const request = pool.request();
-
-      if (filters.userId) {
-        query += ' AND sl.UserId = @userId';
-        request.input('userId', sql.Int, filters.userId);
-      }
-
-      if (filters.action) {
-        query += ' AND sl.Action LIKE @action';
-        request.input('action', sql.NVarChar, '%' + filters.action + '%');
-      }
-
-      if (filters.entity) {
-        query += ' AND sl.Entity = @entity';
-        request.input('entity', sql.NVarChar, filters.entity);
-      }
-
-      if (filters.startDate) {
-        query += ' AND sl.CreatedAt >= @startDate';
-        request.input('startDate', sql.DateTime, filters.startDate);
-      }
-
-      if (filters.endDate) {
-        query += ' AND sl.CreatedAt <= @endDate';
-        request.input('endDate', sql.DateTime, filters.endDate);
-      }
-
-      query += ' ORDER BY sl.CreatedAt DESC';
-
-      if (filters.limit) {
-        query += ` OFFSET ${filters.offset || 0} ROWS FETCH NEXT ${filters.limit} ROWS ONLY`;
-      }
-      
-      const result = await request.query(query);
-      return result.recordset;
-    } catch (err) {
-      throw err;
+    const query = {};
+    if (filters.userId) query.UserId = Number(filters.userId);
+    if (filters.action) query.Action = { $regex: String(filters.action), $options: 'i' };
+    if (filters.entity) query.Entity = filters.entity;
+    if (filters.startDate || filters.endDate) {
+      query.CreatedAt = {};
+      if (filters.startDate) query.CreatedAt.$gte = new Date(filters.startDate);
+      if (filters.endDate) query.CreatedAt.$lte = new Date(filters.endDate);
     }
+
+    const docs = await SystemLogDoc.find(query)
+      .sort({ CreatedAt: -1 })
+      .skip(Number(filters.offset) || 0)
+      .limit(Number(filters.limit) || 500)
+      .lean();
+
+    const userIds = [...new Set(docs.map((x) => x.UserId).filter((x) => x !== null && x !== undefined))];
+    const [users, candidates, companies] = await Promise.all([
+      UserDoc.find({ id: { $in: userIds } }).lean(),
+      CandidateDoc.find({ userId: { $in: userIds } }).lean(),
+      CompanyDoc.find({ userId: { $in: userIds } }).lean()
+    ]);
+
+    const userMap = new Map(users.map((u) => [u.id, u]));
+    const candidateMap = new Map(candidates.map((c) => [c.userId, c]));
+    const companyMap = new Map(companies.map((c) => [c.userId, c]));
+
+    return docs.map((log) => {
+      const user = userMap.get(log.UserId);
+      const candidate = candidateMap.get(log.UserId);
+      const company = companyMap.get(log.UserId);
+      return {
+        ...toPlain(log),
+        Timestamp: log.CreatedAt ? new Date(log.CreatedAt).toISOString().replace('T', ' ').replace('Z', '').slice(0, 23) : null,
+        Email: user?.email || null,
+        UserType: user?.role || null,
+        UserName: candidate?.FullName || company?.CompanyName || null
+      };
+    });
   }
 
   static async deleteOldLogs(daysOld = 90) {
-    try {
-      const pool = await getPool();
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - daysOld);
-      
-      const result = await pool.request()
-        .input('cutoffDate', sql.DateTime, cutoffDate)
-        .query('DELETE FROM SystemLogs WHERE CreatedAt < @cutoffDate');
-      
-      return result.rowsAffected[0];
-    } catch (err) {
-      throw err;
-    }
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - Number(daysOld));
+    const result = await SystemLogDoc.deleteMany({ CreatedAt: { $lt: cutoffDate } });
+    return result.deletedCount || 0;
   }
 }
 

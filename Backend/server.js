@@ -2,11 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const mongoose = require('mongoose');
 const path = require('path');
 require('dotenv').config();
 
-const { getPool, closePool } = require('./config/database');
-const { createTables } = require('./config/initDatabase');
+const { connectMongo, disconnectMongo } = require('./config/mongodb');
 
 // Import routes (located under ./src/routes)
 const authRoutes = require('./routes/auth');
@@ -71,12 +71,34 @@ app.get('/', (req, res) => {
 
 // Health check route
 app.get('/health', (req, res) => {
-  // Perform a lightweight DB check
-  getPool().then(() => {
-    res.json({ status: 'healthy', database: 'connected', timestamp: new Date().toISOString() });
-  }).catch((err) => {
-    res.status(503).json({ status: 'unhealthy', database: 'disconnected', message: err.message });
-  });
+  const connected = mongoose.connection.readyState === 1;
+  if (!connected) {
+    return res.status(503).json({ status: 'unhealthy', database: 'disconnected', message: 'MongoDB is not connected' });
+  }
+
+  res.json({ status: 'healthy', database: 'connected', timestamp: new Date().toISOString() });
+});
+
+// MongoDB health check route to validate read/write access quickly.
+app.get('/api/mongo-health', async (req, res) => {
+  try {
+    const collection = mongoose.connection.db.collection('healthcheck');
+    const payload = { source: 'api/mongo-health', checkedAt: new Date() };
+    await collection.insertOne(payload);
+    const latest = await collection.findOne({}, { sort: { _id: -1 } });
+
+    res.json({
+      status: 'healthy',
+      mongo: 'connected',
+      latest
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: 'unhealthy',
+      mongo: 'disconnected',
+      message: error.message
+    });
+  }
 });
 
 // API Routes
@@ -126,13 +148,8 @@ const PORT = process.env.PORT || 5001;
 const startServer = async () => {
   try {
 
-    // Connect to database
-    await getPool();
-    console.log('✓ Database connected');
-
-    // Auto-create required tables for first run / empty databases.
-    await createTables();
-    console.log('✓ Database schema initialized');
+    // Connect to MongoDB.
+    await connectMongo();
 
     
 
@@ -168,13 +185,13 @@ const startServer = async () => {
 // Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('\nShutting down gracefully...');
-  await closePool();
+  await disconnectMongo();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   console.log('\nShutting down gracefully...');
-  await closePool();
+  await disconnectMongo();
   process.exit(0);
 });
 

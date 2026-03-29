@@ -5,7 +5,7 @@ const SystemLog = require('../models/SystemLog');
 const Admin = require('../models/Admin');
 const { convertToCamelCase } = require('../utils/helper');
 const { toPublicUploadPath } = require('../utils/filePath');
-const { getPool, sql } = require('../config/database');
+const { UserDoc, CompanyDoc, CandidateDoc, JobDoc, ApplicationDoc, InterviewDoc } = require('../models/mongoCollections');
 const { extractTextFromResume, extractResumeProfileData } = require('../utils/resumeParser');
 
 function deriveCompanyNameFromEmail(email) {
@@ -24,19 +24,11 @@ async function ensureCompanyProfileByUserId(userId) {
   const user = await User.findById(userId);
   if (!user || user.role !== 'company') return null;
 
-  const pool = await getPool();
-  await pool.request()
-    .input('userId', sql.Int, userId)
-    .input('companyName', sql.NVarChar(255), deriveCompanyNameFromEmail(user.email))
-    .input('phone', sql.NVarChar(20), '00000000000')
-    .input('industry', sql.NVarChar(100), 'Other')
-    .query(`
-      INSERT INTO Companies (userId, CompanyName, PhoneNumber, Industry)
-      VALUES (@userId, @companyName, @phone, @industry)
-    `);
-
-  company = await Company.findByUserId(userId);
-  return company || null;
+  return Company.ensureForUser(userId, {
+    companyName: deriveCompanyNameFromEmail(user.email),
+    phone: '00000000000',
+    industry: 'Other'
+  });
 }
 
 function getUploadedFile(req, preferredFields = []) {
@@ -123,7 +115,6 @@ const userController = {
   // Delete candidate (Admin only)
   deleteCandidate: async (req, res) => {
     const { userId } = req.params;
-    let transaction;
 
     try {
       const candidate = await Candidate.findByUserId(userId);
@@ -132,33 +123,15 @@ const userController = {
       }
 
       const candidateId = candidate.CandidateID || candidate.CandidateId;
-      const pool = await getPool();
-      transaction = new sql.Transaction(pool);
-      await transaction.begin();
+      const apps = await ApplicationDoc.find({ CandidateID: Number(candidateId) }, { ApplicationID: 1 }).lean();
+      const appIds = apps.map((a) => a.ApplicationID);
 
-      // Remove candidate interviews first, then applications, then candidate profile, then user.
-      await new sql.Request(transaction)
-        .input('candidateId', sql.Int, candidateId)
-        .query(`
-          DELETE i
-          FROM Interviews i
-          INNER JOIN Applications a ON i.ApplicationID = a.ApplicationID
-          WHERE a.CandidateID = @candidateId
-        `);
-
-      await new sql.Request(transaction)
-        .input('candidateId', sql.Int, candidateId)
-        .query('DELETE FROM Applications WHERE CandidateID = @candidateId');
-
-      await new sql.Request(transaction)
-        .input('candidateId', sql.Int, candidateId)
-        .query('DELETE FROM Candidates WHERE CandidateID = @candidateId');
-
-      await new sql.Request(transaction)
-        .input('userId', sql.Int, userId)
-        .query('DELETE FROM Users WHERE id = @userId');
-
-      await transaction.commit();
+      if (appIds.length) {
+        await InterviewDoc.deleteMany({ ApplicationID: { $in: appIds } });
+      }
+      await ApplicationDoc.deleteMany({ CandidateID: Number(candidateId) });
+      await CandidateDoc.deleteOne({ CandidateID: Number(candidateId) });
+      await User.delete(Number(userId));
 
       await SystemLog.create({
         userId: req.user.id,
@@ -172,14 +145,6 @@ const userController = {
 
       res.json({ message: 'Candidate deleted successfully' });
     } catch (error) {
-      if (transaction) {
-        try {
-          await transaction.rollback();
-        } catch (_) {
-          // Ignore rollback errors to preserve original failure context.
-        }
-      }
-
       console.error('Delete candidate error:', error);
       res.status(500).json({
         error: 'Failed to delete candidate',
@@ -190,7 +155,6 @@ const userController = {
 
   deleteCompany: async (req, res) => {
     const { userId } = req.params;
-    let transaction;
 
     try {
       const company = await Company.findByUserId(userId);
@@ -199,43 +163,22 @@ const userController = {
       }
 
       const companyId = company.CompanyID || company.CompanyId;
-      const pool = await getPool();
-      transaction = new sql.Transaction(pool);
-      await transaction.begin();
+      const jobs = await JobDoc.find({ CompanyID: Number(companyId) }, { JobID: 1 }).lean();
+      const jobIds = jobs.map((j) => j.JobID);
+      const apps = jobIds.length
+        ? await ApplicationDoc.find({ JobID: { $in: jobIds } }, { ApplicationID: 1 }).lean()
+        : [];
+      const appIds = apps.map((a) => a.ApplicationID);
 
-      // Remove interviews linked to company's job applications, then applications, jobs, company profile, then user.
-      await new sql.Request(transaction)
-        .input('companyId', sql.Int, companyId)
-        .query(`
-          DELETE i
-          FROM Interviews i
-          INNER JOIN Applications a ON i.ApplicationID = a.ApplicationID
-          INNER JOIN Jobs j ON a.JobID = j.JobID
-          WHERE j.CompanyID = @companyId
-        `);
-
-      await new sql.Request(transaction)
-        .input('companyId', sql.Int, companyId)
-        .query(`
-          DELETE a
-          FROM Applications a
-          INNER JOIN Jobs j ON a.JobID = j.JobID
-          WHERE j.CompanyID = @companyId
-        `);
-
-      await new sql.Request(transaction)
-        .input('companyId', sql.Int, companyId)
-        .query('DELETE FROM Jobs WHERE CompanyID = @companyId');
-
-      await new sql.Request(transaction)
-        .input('companyId', sql.Int, companyId)
-        .query('DELETE FROM Companies WHERE CompanyID = @companyId');
-
-      await new sql.Request(transaction)
-        .input('userId', sql.Int, userId)
-        .query('DELETE FROM Users WHERE id = @userId');
-
-      await transaction.commit();
+      if (appIds.length) {
+        await InterviewDoc.deleteMany({ ApplicationID: { $in: appIds } });
+      }
+      if (jobIds.length) {
+        await ApplicationDoc.deleteMany({ JobID: { $in: jobIds } });
+      }
+      await JobDoc.deleteMany({ CompanyID: Number(companyId) });
+      await CompanyDoc.deleteOne({ CompanyID: Number(companyId) });
+      await User.delete(Number(userId));
 
       await SystemLog.create({
         userId: req.user.id,
@@ -249,11 +192,6 @@ const userController = {
 
       res.json({ message: 'Company deleted successfully' });
     } catch (error) {
-      if (transaction) {
-        try {
-          await transaction.rollback();
-        } catch (_) {}
-      }
       console.error('Delete company error:', error);
       res.status(500).json({ error: 'Failed to delete company', message: error.message });
     }
@@ -674,21 +612,36 @@ const userController = {
   // Get dashboard stats (Admin only)
   getAdminDashboardStats: async (req, res) => {
     try {
-      const pool = await getPool();
+      const [
+        totalCompanies,
+        totalCandidates,
+        totalJobs,
+        activeJobs,
+        totalApplications,
+        pendingApplications,
+        activeUsers,
+        inactiveUsers
+      ] = await Promise.all([
+        CompanyDoc.countDocuments(),
+        CandidateDoc.countDocuments(),
+        JobDoc.countDocuments(),
+        JobDoc.countDocuments({ IsActive: true }),
+        ApplicationDoc.countDocuments(),
+        ApplicationDoc.countDocuments({ Status: 'Pending' }),
+        UserDoc.countDocuments({ isActive: true }),
+        UserDoc.countDocuments({ isActive: false })
+      ]);
 
-      const result = await pool.request().query(`
-        SELECT 
-          (SELECT COUNT(*) FROM Companies) as totalCompanies,
-          (SELECT COUNT(*) FROM Candidates) as totalCandidates,
-          (SELECT COUNT(*) FROM Jobs) as totalJobs,
-          (SELECT COUNT(*) FROM Jobs WHERE IsActive = 1) as activeJobs,
-          (SELECT COUNT(*) FROM Applications) as totalApplications,
-          (SELECT COUNT(*) FROM Applications WHERE Status = 'Pending') as pendingApplications,
-          (SELECT COUNT(*) FROM Users WHERE isActive = 1) as activeUsers,
-          (SELECT COUNT(*) FROM Users WHERE isActive = 0) as inactiveUsers
-      `);
-
-      res.json(result.recordset[0]);
+      res.json({
+        totalCompanies,
+        totalCandidates,
+        totalJobs,
+        activeJobs,
+        totalApplications,
+        pendingApplications,
+        activeUsers,
+        inactiveUsers
+      });
     } catch (error) {
       console.error('Get admin dashboard stats error:', error);
       res.status(500).json({ error: 'Failed to fetch dashboard statistics', message: error.message });

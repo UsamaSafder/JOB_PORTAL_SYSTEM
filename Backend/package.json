@@ -1,7 +1,7 @@
 {
   "name": "job-portal-backend",
   "version": "1.0.0",
-  "description": "Job Portal Backend API with SQL Server",
+  "description": "Job Portal Backend API with MongoDB",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -10,7 +10,7 @@
   "keywords": [
     "job-portal",
     "express",
-    "sql-server"
+    "mongodb"
   ],
   "author": "",
   "license": "ISC",
@@ -24,9 +24,8 @@
     "job-portal-system": "file:..",
     "jsonwebtoken": "^9.0.2",
     "mammoth": "^1.11.0",
+    "mongoose": "^9.3.3",
     "morgan": "^1.10.0",
-    "msnodesqlv8": "^5.1.5",
-    "mssql": "^10.0.1",
     "multer": "^1.4.5-lts.1",
     "pdf-parse": "^2.4.5",
     "pdf2json": "^4.0.2"
