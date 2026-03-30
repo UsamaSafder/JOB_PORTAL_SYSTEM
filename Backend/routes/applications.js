@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
 const applicationController = require('../controllers/applicationController');
-const { auth, authorize } = require('../middleware/auth');
+const { auth, authorize, requireApprovedCompany } = require('../middleware/auth');
 const { uploadResume, handleMulterError } = require('../middleware/upload');
 const { validate } = require('../middleware/validator');
 
@@ -36,9 +36,9 @@ router.get('/my-applications', auth, authorize('candidate'), applicationControll
 router.get('/my-interviews', auth, authorize('candidate'), applicationController.getCandidateInterviews);
 
 // Company routes - specific named routes
-router.get('/company/received', auth, authorize('company'), applicationController.getCompanyApplications);
-router.get('/job/:jobId', auth, authorize('company'), applicationController.getApplicationsByJobId);
-router.get('/company/:companyId', auth, authorize('company'), applicationController.getApplicationsByCompanyId);
+router.get('/company/received', auth, authorize('company'), requireApprovedCompany, applicationController.getCompanyApplications);
+router.get('/job/:jobId', auth, authorize('company'), requireApprovedCompany, applicationController.getApplicationsByJobId);
+router.get('/company/:companyId', auth, authorize('company'), requireApprovedCompany, applicationController.getApplicationsByCompanyId);
 
 // IMPORTANT: Specific parameterized routes MUST come BEFORE generic :id routes
 // These must be defined in order of specificity (most specific first)
@@ -64,12 +64,13 @@ router.post(
   '/:id/schedule-interview',
   auth,
   authorize('company'),
+  requireApprovedCompany,
   interviewValidation,
   applicationController.scheduleInterview
 );
 
 // Status update - specific (2 segments)
-router.patch('/:id/status', auth, authorize('company', 'admin'), applicationController.updateApplicationStatus);
+router.patch('/:id/status', auth, authorize('company', 'admin'), requireApprovedCompany, applicationController.updateApplicationStatus);
 
 // Generic routes - must come LAST
 router.delete('/:id', auth, authorize('candidate', 'admin'), applicationController.deleteApplication);

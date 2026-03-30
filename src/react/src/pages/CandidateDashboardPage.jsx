@@ -36,8 +36,17 @@ function CandidateDashboardPage() {
           rejectedApplications: statsData.rejectedApplications || 0
         });
 
+        const normalizedRecommendedJobs = (jobsData || []).slice(0, 5).map((job, index) => ({
+          jobId: job?.jobId ?? job?.JobID ?? `recommended-${index}`,
+          title: job?.title ?? job?.Title ?? 'Untitled role',
+          companyName: job?.companyName ?? job?.CompanyName ?? 'Unknown company',
+          location: job?.location ?? job?.Location ?? 'Location not specified',
+          employmentType: job?.employmentType ?? job?.EmploymentType ?? 'Type not specified',
+          logo: job?.logo ?? job?.Logo ?? null
+        }));
+
         setRecentApplications((appsData || []).slice(0, 5));
-        setRecommendedJobs((jobsData || []).slice(0, 5));
+        setRecommendedJobs(normalizedRecommendedJobs);
       } catch {
         setStats({
           totalApplications: 0,

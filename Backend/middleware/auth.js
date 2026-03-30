@@ -3,6 +3,14 @@ const User = require('../models/User');
 const Company = require('../models/Company');
 const Candidate = require('../models/Candidate');
 
+function normalizeCompanyApprovalStatus(company) {
+  if (!company) return false;
+  if (company.isVerified !== undefined) return !!company.isVerified;
+  if (company.IsVerified !== undefined) return !!company.IsVerified;
+  if (company.UserIsVerified !== undefined) return !!company.UserIsVerified;
+  return false;
+}
+
 const auth = async (req, res, next) => {
   try {
     const rawAuth = req.header('Authorization');
@@ -40,6 +48,7 @@ const auth = async (req, res, next) => {
     // Now look up additional info based on the role
     let companyId = null;
     let candidateId = null;
+    let companyIsVerified = null;
 
     if (userRole === 'company') {
       const comp = await Company.findByUserId(decoded.id);
@@ -47,6 +56,7 @@ const auth = async (req, res, next) => {
 
       if (comp) {
         companyId = comp.CompanyID;
+        companyIsVerified = normalizeCompanyApprovalStatus(comp);
       } else {
         console.warn('No company found for userId:', decoded.id);
       }
@@ -68,6 +78,7 @@ const auth = async (req, res, next) => {
       email: userRow.email,
       companyId: companyId,
       candidateId: candidateId,
+      companyIsVerified,
       ...userRow
     };
     
@@ -116,12 +127,16 @@ const optionalAuth = async (req, res, next) => {
         // Look up additional info based on role
         let companyId = null;
         let candidateId = null;
+        let companyIsVerified = null;
 
         const userRole = decoded.role || userRow.role || 'user';
 
         if (userRole === 'company') {
           const comp = await Company.findByUserId(decoded.id);
-          if (comp) companyId = comp.CompanyID;
+          if (comp) {
+            companyId = comp.CompanyID;
+            companyIsVerified = normalizeCompanyApprovalStatus(comp);
+          }
         } else if (userRole === 'candidate') {
           const cand = await Candidate.findByUserId(decoded.id);
           if (cand) candidateId = cand.CandidateID;
@@ -133,6 +148,7 @@ const optionalAuth = async (req, res, next) => {
           email: userRow.email,
           companyId: companyId,
           candidateId: candidateId,
+          companyIsVerified,
           ...userRow
         };
       }
@@ -145,4 +161,34 @@ const optionalAuth = async (req, res, next) => {
   }
 };
 
-module.exports = { auth, authorize, optionalAuth };
+const requireApprovedCompany = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    if (req.user.role !== 'company') {
+      return next();
+    }
+
+    let isApproved = req.user.companyIsVerified;
+
+    if (isApproved === null || isApproved === undefined) {
+      const company = await Company.findByUserId(req.user.id);
+      isApproved = normalizeCompanyApprovalStatus(company);
+    }
+
+    if (!isApproved) {
+      return res.status(403).json({
+        error: 'Company account is pending admin approval. Access is restricted until verification is complete.'
+      });
+    }
+
+    next();
+  } catch (error) {
+    console.error('Company approval middleware error:', error);
+    return res.status(500).json({ error: 'Failed to verify company approval status' });
+  }
+};
+
+module.exports = { auth, authorize, optionalAuth, requireApprovedCompany };

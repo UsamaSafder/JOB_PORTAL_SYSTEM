@@ -241,7 +241,7 @@ const jobController = {
 
       const jobs = await Job.getRecommendedJobs(candidate.CandidateID, 10);
 
-      res.json({ jobs });
+      res.json({ jobs: convertToCamelCase(jobs) });
     } catch (error) {
       console.error('Get recommended jobs error:', error);
       res.status(500).json({ error: 'Failed to fetch recommended jobs', message: error.message });

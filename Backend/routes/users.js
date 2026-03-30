@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
-const { auth, authorize } = require('../middleware/auth');
+const { auth, authorize, requireApprovedCompany } = require('../middleware/auth');
 const { uploadLogo, uploadCandidateAssets, candidateProfileImageFields, handleMulterError } = require('../middleware/upload');
 
 // Admin routes
@@ -20,12 +20,13 @@ router.put(
   '/company/profile',
   auth,
   authorize('company'),
+  requireApprovedCompany,
   uploadLogo.any(),
   handleMulterError,
   userController.updateCompanyProfile
 );
-router.get('/company/profile', auth, authorize('company'), userController.getCompanyProfile);
-router.get('/company/stats', auth, authorize('company'), userController.getCompanyStats);
+router.get('/company/profile', auth, authorize('company'), requireApprovedCompany, userController.getCompanyProfile);
+router.get('/company/stats', auth, authorize('company'), requireApprovedCompany, userController.getCompanyStats);
 
 // Candidate routes
 router.put(
