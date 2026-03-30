@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getApplicationById, updateApplicationStatus } from '../services/companyService';
 import { Toast, useDialog } from '../components/Dialog';
+import { toPublicFileUrl } from '../utils/media';
 import '../../../app/company/application-details/application-details.css';
 
 function ApplicationDetailsPage() {
@@ -65,18 +66,88 @@ function ApplicationDetailsPage() {
     return `http://localhost:5001/${normalized.replace(/^\/+/, '')}`;
   };
 
-  const downloadResume = () => {
-    if (!application?.resumeLink) return;
-    const resumeUrl = getResumeUrl(application.resumeLink);
-    if (!resumeUrl) return;
-    window.open(resumeUrl, '_blank', 'noopener,noreferrer');
-  };
-
   const scheduleInterviewPage = () => {
     navigate(`/company/schedule-interview/${id}`);
   };
 
-  const hasInterview = Boolean(interview?.scheduledDate);
+  const interviewDateValue = interview?.scheduledDate || interview?.interviewDate || interview?.scheduled_at || null;
+  const interviewModeValue = interview?.mode || interview?.interviewType || interview?.interview_mode || '-';
+  const interviewLocationValue = interview?.location || interview?.meetingLink || interview?.meeting_link || '';
+  const interviewStatusValue = interview?.status || interview?.interviewStatus || 'scheduled';
+
+  const hasInterview = Boolean(interviewDateValue);
+
+  const isResumeFilePath = (filePath) => {
+    const value = String(filePath || '').trim().toLowerCase();
+    if (!value) return false;
+    const isImage = /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?|$)/i.test(value);
+    if (isImage) return false;
+    return /\.(pdf|doc|docx|rtf|txt)(\?|$)/i.test(value) || value.includes('/uploads/resumes/');
+  };
+
+  const resolveResumePath = () => {
+    const candidates = [
+      application?.resumePath,
+      application?.submittedResumePath,
+      application?.resumeLink,
+      application?.candidateResumeLink
+    ];
+
+    const match = candidates.find((item) => isResumeFilePath(item));
+    return match ? String(match) : '';
+  };
+
+  const resumePath = resolveResumePath();
+  const hasResume = Boolean(resumePath);
+
+  const openResume = () => {
+    if (!hasResume) {
+      notify('Resume not available for this application.', 'error');
+      return;
+    }
+
+    const resumeUrl = getResumeUrl(resumePath);
+    if (!resumeUrl) {
+      notify('Resume URL is invalid.', 'error');
+      return;
+    }
+
+    window.open(resumeUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const downloadResume = async () => {
+    if (!hasResume) {
+      notify('Resume not available for download.', 'error');
+      return;
+    }
+
+    const resumeUrl = getResumeUrl(resumePath);
+    if (!resumeUrl) {
+      notify('Resume URL is invalid.', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch(resumeUrl, { credentials: 'include' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+      const fileName = String(resumePath).split('/').pop() || 'resume';
+
+      const anchor = document.createElement('a');
+      anchor.href = objectUrl;
+      anchor.download = fileName;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      window.URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      notify('Failed to download resume.', 'error');
+    }
+  };
 
   return (
     <div className="details-container">
@@ -136,22 +207,22 @@ function ApplicationDetailsPage() {
                 <div className="interview-item">
                   <span className="interview-label">Date & Time:</span>
                   <span className="interview-value">
-                    {interview.scheduledDate ? new Date(interview.scheduledDate).toLocaleString() : '-'}
+                    {interviewDateValue ? new Date(interviewDateValue).toLocaleString() : '-'}
                   </span>
                 </div>
                 <div className="interview-item">
                   <span className="interview-label">Mode:</span>
-                  <span className="interview-value">{interview.mode || interview.interviewType || '-'}</span>
+                  <span className="interview-value">{interviewModeValue}</span>
                 </div>
-                {interview.location ? (
+                {interviewLocationValue ? (
                   <div className="interview-item">
                     <span className="interview-label">Location:</span>
-                    <span className="interview-value">{interview.location}</span>
+                    <span className="interview-value">{interviewLocationValue}</span>
                   </div>
                 ) : null}
                 <div className="interview-item">
                   <span className="interview-label">Status:</span>
-                  <span className="interview-value">{interview.status || '-'}</span>
+                  <span className="interview-value">{interviewStatusValue}</span>
                 </div>
               </div>
             </div>
@@ -161,7 +232,15 @@ function ApplicationDetailsPage() {
             <div className="info-card profile-card">
               <h2>👤 Candidate Information</h2>
               <div className="candidate-header">
-                <div className="candidate-avatar-large">{(application.candidateName || 'U').charAt(0)}</div>
+                {toPublicFileUrl(application.candidateProfilePicture || application.profilePicture) ? (
+                  <img
+                    src={toPublicFileUrl(application.candidateProfilePicture || application.profilePicture)}
+                    alt={application.candidateName || 'Candidate'}
+                    className="candidate-avatar-large candidate-avatar-image"
+                  />
+                ) : (
+                  <div className="candidate-avatar-large">{(application.candidateName || 'U').charAt(0)}</div>
+                )}
                 <div>
                   <h3>{application.candidateName || 'Unknown Candidate'}</h3>
                   <p className="candidate-subtitle">{application.experienceYears || 0} years of experience</p>
@@ -210,7 +289,7 @@ function ApplicationDetailsPage() {
                 </div>
               </div>
 
-              {application.resumeLink ? (
+              {hasResume ? (
                 <div className="resume-section">
                   <button className="btn-resume" onClick={downloadResume}>📄 Download Resume</button>
                 </div>
@@ -291,8 +370,8 @@ function ApplicationDetailsPage() {
           </div>
 
           <div className="action-buttons">
-            <button className="btn-action btn-resume-inline" onClick={downloadResume} disabled={!application.resumeLink}>
-              📄 {application.resumeLink ? 'Open Resume' : 'Resume Not Available'}
+            <button className="btn-action btn-resume-inline" onClick={openResume} disabled={!hasResume}>
+              📄 {hasResume ? 'Open Resume' : 'Resume Not Available'}
             </button>
           </div>
         </>

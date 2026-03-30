@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getCandidateApplications, withdrawApplication } from '../services/candidateService';
 import { DialogModal, Toast, useDialog } from '../components/Dialog';
+import { toPublicFileUrl } from '../utils/media';
 import '../../../app/candidate/my-applications/my-applications.css';
 
 const STATUS_OPTIONS = ['All', 'Pending', 'Reviewed', 'Interview', 'Accepted', 'Rejected'];
@@ -33,6 +34,15 @@ function MyApplicationsPage() {
     const normalized = selectedStatus.toLowerCase();
     return applications.filter((item) => String(item.status || '').toLowerCase() === normalized);
   }, [applications, selectedStatus]);
+
+  const stats = useMemo(() => {
+    const total = applications.length;
+    const pending = applications.filter((item) => String(item.status || '').toLowerCase() === 'pending').length;
+    const review = applications.filter((item) => String(item.status || '').toLowerCase() === 'reviewed').length;
+    const interview = applications.filter((item) => String(item.status || '').toLowerCase() === 'interview').length;
+    const accepted = applications.filter((item) => String(item.status || '').toLowerCase() === 'accepted').length;
+    return { total, pending, review, interview, accepted };
+  }, [applications]);
 
   const handleWithdraw = async (applicationId) => {
     if (!applicationId) return;
@@ -78,6 +88,14 @@ function MyApplicationsPage() {
         <p>Track and manage your job applications</p>
       </div>
 
+      <div className="ma-stats-grid">
+        <div className="ma-stat-card"><span className="ma-stat-label">Total</span><span className="ma-stat-value">{stats.total}</span></div>
+        <div className="ma-stat-card"><span className="ma-stat-label">Pending</span><span className="ma-stat-value">{stats.pending}</span></div>
+        <div className="ma-stat-card"><span className="ma-stat-label">Reviewed</span><span className="ma-stat-value">{stats.review}</span></div>
+        <div className="ma-stat-card"><span className="ma-stat-label">Interview</span><span className="ma-stat-value">{stats.interview}</span></div>
+        <div className="ma-stat-card"><span className="ma-stat-label">Accepted</span><span className="ma-stat-value">{stats.accepted}</span></div>
+      </div>
+
       <div className="filter-section">
         <div className="filter-group">
           <label htmlFor="statusFilter">Filter by Status:</label>
@@ -112,7 +130,15 @@ function MyApplicationsPage() {
           {filteredApplications.map((application) => (
             <div key={application.applicationId} className="application-card">
               <div className="card-header">
-                <div className="company-logo">{(application.companyName || 'C').charAt(0)}</div>
+                {toPublicFileUrl(application.companyLogo || application.logo) ? (
+                  <img
+                    src={toPublicFileUrl(application.companyLogo || application.logo)}
+                    alt={application.companyName || 'Company'}
+                    className="company-logo company-logo-image"
+                  />
+                ) : (
+                  <div className="company-logo">{(application.companyName || 'C').charAt(0)}</div>
+                )}
                 <div className="job-info">
                   <h3>{application.jobTitle}</h3>
                   <p className="company-name">{application.companyName}</p>

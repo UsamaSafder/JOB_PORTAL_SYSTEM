@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getApplicationById, scheduleInterview } from '../services/companyService';
+import { toPublicFileUrl } from '../utils/media';
 import '../../../app/company/schedule-interview/schedule-interview.css';
 
 function ScheduleInterviewPage() {
@@ -12,6 +13,7 @@ function ScheduleInterviewPage() {
   const [submitted, setSubmitted] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [avatarLoadError, setAvatarLoadError] = useState(false);
 
   const [values, setValues] = useState({
     mode: 'Online',
@@ -43,6 +45,15 @@ function ScheduleInterviewPage() {
     }
     return next;
   }, [values]);
+
+  const candidateAvatarUrl = useMemo(
+    () => toPublicFileUrl(application?.candidateProfilePicture),
+    [application?.candidateProfilePicture]
+  );
+
+  useEffect(() => {
+    setAvatarLoadError(false);
+  }, [candidateAvatarUrl]);
 
   const getMinDate = () => new Date().toISOString().slice(0, 10);
 
@@ -106,7 +117,16 @@ function ScheduleInterviewPage() {
 
       {application ? (
         <div className="candidate-card">
-          <div className="candidate-avatar">{(application.candidateName || 'U').charAt(0)}</div>
+          {candidateAvatarUrl && !avatarLoadError ? (
+            <img
+              src={candidateAvatarUrl}
+              alt={application.candidateName || 'Candidate'}
+              className="candidate-avatar candidate-avatar-image"
+              onError={() => setAvatarLoadError(true)}
+            />
+          ) : (
+            <div className="candidate-avatar">{(application.candidateName || 'U').charAt(0)}</div>
+          )}
           <div className="candidate-info">
             <h3>{application.candidateName || 'Unknown Candidate'}</h3>
             <p>📧 {application.candidateEmail || '-'}</p>

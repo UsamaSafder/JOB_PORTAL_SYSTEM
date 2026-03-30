@@ -75,6 +75,12 @@
   border: 3px solid rgba(255, 255, 255, 0.5);
 }
 
+.candidate-avatar-image {
+  object-fit: cover;
+  object-position: center;
+  background: #ffffff;
+}
+
 .candidate-info h3 {
   margin: 0 0 10px 0;
   font-size: 22px;

@@ -238,7 +238,12 @@
   flex-direction: column;
   gap: 10px;
 }
-
+.candidate-avatar-image {
+  object-fit: cover;
+  object-position: center;
+  background: #ffffff;
+  border: 2px solid #dbeafe;
+}
 .detail-row {
   display: flex;
   gap: 10px;

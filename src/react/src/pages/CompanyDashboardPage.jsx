@@ -281,24 +281,24 @@ function CompanyDashboardPage() {
             )}
           </div>
 
-          <div className="quick-actions">
+          <div className="company-quick-actions">
             <h2>Quick Actions</h2>
-            <div className="action-buttons">
-              <button className="action-btn" onClick={() => navigate('/company/post-job')}>
-                <span className="icon">➕</span>
-                <span>Post New Job</span>
+            <div className="company-action-buttons">
+              <button className="company-action-btn" onClick={() => navigate('/company/post-job')}>
+                <span className="company-action-icon">➕</span>
+                <span className="company-action-label">Post New Job</span>
               </button>
-              <button className="action-btn" onClick={() => navigate('/company/applications')}>
-                <span className="icon">📄</span>
-                <span>View Applications</span>
+              <button className="company-action-btn" onClick={() => navigate('/company/applications')}>
+                <span className="company-action-icon">📄</span>
+                <span className="company-action-label">View Applications</span>
               </button>
-              <button className="action-btn" onClick={() => navigate('/company/manage-jobs')}>
-                <span className="icon">📋</span>
-                <span>Manage Jobs</span>
+              <button className="company-action-btn" onClick={() => navigate('/company/manage-jobs')}>
+                <span className="company-action-icon">📋</span>
+                <span className="company-action-label">Manage Jobs</span>
               </button>
-              <button className="action-btn" onClick={() => navigate('/company/profile')}>
-                <span className="icon">🏢</span>
-                <span>Edit Profile</span>
+              <button className="company-action-btn" onClick={() => navigate('/company/profile')}>
+                <span className="company-action-icon">🏢</span>
+                <span className="company-action-label">Edit Profile</span>
               </button>
             </div>
           </div>

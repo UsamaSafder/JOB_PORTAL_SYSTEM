@@ -22,13 +22,17 @@ class Job {
   static async findById(jobId) {
     const job = await JobDoc.findOne({ JobID: Number(jobId) }).lean();
     if (!job) return null;
-    const company = await CompanyDoc.findOne({ CompanyID: job.CompanyID }).lean();
+    const [company, applicationsCount] = await Promise.all([
+      CompanyDoc.findOne({ CompanyID: job.CompanyID }).lean(),
+      ApplicationDoc.countDocuments({ JobID: job.JobID })
+    ]);
     return {
       ...toPlain(job),
       CompanyName: company?.CompanyName,
       CompanyLocation: company?.Location,
       Website: company?.Website,
-      Logo: company?.Logo
+      Logo: company?.Logo,
+      ApplicationsCount: applicationsCount || 0
     };
   }
 
@@ -57,6 +61,12 @@ class Job {
 
     const companies = await CompanyDoc.find({ CompanyID: { $in: docs.map((j) => j.CompanyID) } }).lean();
     const companyMap = new Map(companies.map((c) => [c.CompanyID, c]));
+    const jobIds = docs.map((j) => j.JobID);
+    const applicationsByJob = await ApplicationDoc.aggregate([
+      { $match: { JobID: { $in: jobIds } } },
+      { $group: { _id: '$JobID', count: { $sum: 1 } } }
+    ]);
+    const applicationCountMap = new Map(applicationsByJob.map((item) => [Number(item._id), Number(item.count) || 0]));
 
     return docs.map((job) => {
       const company = companyMap.get(job.CompanyID);
@@ -65,7 +75,8 @@ class Job {
         PostedAt: job.CreatedAt || job.PostedAt,
         CompanyName: company?.CompanyName,
         CompanyLocation: company?.Location,
-        Logo: company?.Logo
+        Logo: company?.Logo,
+        ApplicationsCount: applicationCountMap.get(job.JobID) || 0
       };
     });
   }

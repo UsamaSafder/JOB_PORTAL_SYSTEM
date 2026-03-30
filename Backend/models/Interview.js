@@ -49,6 +49,8 @@ class Interview {
       CandidateName: candidate?.FullName,
       CandidatePhone: candidate?.PhoneNumber,
       CompanyName: company?.CompanyName,
+      CompanyLogo: company?.Logo,
+      logo: company?.Logo,
       CandidateEmail: user?.email
     };
   }
@@ -103,6 +105,8 @@ class Interview {
         CandidateName: candidate?.FullName,
         CandidatePhone: candidate?.PhoneNumber,
         CompanyName: company?.CompanyName,
+        CompanyLogo: company?.Logo,
+        logo: company?.Logo,
         CompanyID: company?.CompanyID,
         CandidateEmail: user?.email
       };

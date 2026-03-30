@@ -201,6 +201,24 @@
   box-shadow: 0 14px 30px rgba(102, 126, 234, 0.26);
 }
 
+.details-container .interview-card {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #dbe3f0;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08) !important;
+}
+
+.details-container .interview-card h3,
+.details-container .interview-label,
+.details-container .interview-value {
+  color: #111827 !important;
+  opacity: 1 !important;
+}
+
+.details-container .interview-item::before {
+  display: none !important;
+}
+
 .interview-card h3 {
   margin: 0 0 20px 0;
   font-size: 20px;
@@ -299,6 +317,13 @@
   font-weight: bold;
   flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.candidate-avatar-image {
+  object-fit: cover;
+  object-position: center;
+  background: #ffffff;
+  border: 2px solid #dbeafe;
 }
 
 .candidate-header h3 {

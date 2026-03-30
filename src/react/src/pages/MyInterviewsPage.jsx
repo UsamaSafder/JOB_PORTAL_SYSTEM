@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getCandidateInterviews } from '../services/candidateService';
+import { toPublicFileUrl } from '../utils/media';
 import '../../../app/candidate/my-interviews/my-interviews.css';
 
 function MyInterviewsPage() {
@@ -94,7 +95,15 @@ function MyInterviewsPage() {
               {upcomingInterviews.map((interview) => (
                 <div key={interview.interviewId} className="interview-card upcoming">
                   <div className="card-header">
-                    <div className="company-logo">{(interview.companyName || 'C').charAt(0)}</div>
+                    {toPublicFileUrl(interview.companyLogo || interview.logo) ? (
+                      <img
+                        src={toPublicFileUrl(interview.companyLogo || interview.logo)}
+                        alt={interview.companyName || 'Company'}
+                        className="company-logo company-logo-image"
+                      />
+                    ) : (
+                      <div className="company-logo">{(interview.companyName || 'C').charAt(0)}</div>
+                    )}
                     <div className="interview-info">
                       <h3>{interview.jobTitle}</h3>
                       <p className="company-name">{interview.companyName}</p>
@@ -174,7 +183,15 @@ function MyInterviewsPage() {
               {pastInterviews.map((interview) => (
                 <div key={interview.interviewId} className="interview-card past">
                   <div className="card-header">
-                    <div className="company-logo">{(interview.companyName || 'C').charAt(0)}</div>
+                    {toPublicFileUrl(interview.companyLogo || interview.logo) ? (
+                      <img
+                        src={toPublicFileUrl(interview.companyLogo || interview.logo)}
+                        alt={interview.companyName || 'Company'}
+                        className="company-logo company-logo-image"
+                      />
+                    ) : (
+                      <div className="company-logo">{(interview.companyName || 'C').charAt(0)}</div>
+                    )}
                     <div className="interview-info">
                       <h3>{interview.jobTitle}</h3>
                       <p className="company-name">{interview.companyName}</p>

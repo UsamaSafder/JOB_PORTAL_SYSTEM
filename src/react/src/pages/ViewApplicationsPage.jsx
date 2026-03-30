@@ -6,6 +6,7 @@ import {
   updateApplicationStatus
 } from '../services/companyService';
 import { Toast, useDialog } from '../components/Dialog';
+import { toPublicFileUrl } from '../utils/media';
 import '../../../app/company/view-applications/view-applications.css';
 
 function ViewApplicationsPage() {
@@ -184,7 +185,15 @@ function ViewApplicationsPage() {
               {filteredApplications.map((app) => (
                 <div key={app.applicationId} className="application-card">
                   <div className="candidate-section">
-                    <div className="candidate-avatar">{(app.candidateName || 'U').charAt(0)}</div>
+                    {toPublicFileUrl(app.candidateProfilePicture || app.profilePicture) ? (
+                      <img
+                        src={toPublicFileUrl(app.candidateProfilePicture || app.profilePicture)}
+                        alt={app.candidateName || 'Candidate'}
+                        className="candidate-avatar candidate-avatar-image"
+                      />
+                    ) : (
+                      <div className="candidate-avatar">{(app.candidateName || 'U').charAt(0)}</div>
+                    )}
                     <div className="candidate-info">
                       <h3>{app.candidateName || 'Unknown Candidate'}</h3>
                       <p className="candidate-email">📧 {app.candidateEmail || 'No email'}</p>
