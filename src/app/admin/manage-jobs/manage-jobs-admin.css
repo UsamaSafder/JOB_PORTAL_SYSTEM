@@ -112,7 +112,11 @@
       background: white;
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      overflow-x: auto; /* enable horizontal scroll when needed */
+      overflow-x: scroll; /* always expose horizontal scrollbar */
+      overflow-y: auto;
+      max-width: 100%;
+      max-height: 70vh;
+      scrollbar-gutter: stable both-edges;
       -webkit-overflow-scrolling: touch;
       margin-bottom: 20px;
     }
@@ -120,7 +124,12 @@
     .jobs-table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 1100px; /* encourage horizontal scrolling on narrow screens */
+      min-width: 1250px; /* encourage horizontal scrolling on narrow screens */
+    }
+
+    .jobs-table th,
+    .jobs-table td {
+      white-space: nowrap;
     }
 
     .jobs-table thead {
@@ -225,6 +234,25 @@
     .actions {
       display: flex;
       gap: 8px;
+      white-space: nowrap;
+    }
+
+    .jobs-table th:last-child,
+    .jobs-table td:last-child {
+      position: sticky;
+      right: 0;
+      z-index: 2;
+      background: #ffffff;
+    }
+
+    .jobs-table thead th:last-child {
+      z-index: 3;
+      background: #f8f9fa;
+      box-shadow: -8px 0 10px -8px rgba(15, 23, 42, 0.2);
+    }
+
+    .jobs-table tbody td:last-child {
+      box-shadow: -8px 0 10px -8px rgba(15, 23, 42, 0.18);
     }
 
     .actions button {

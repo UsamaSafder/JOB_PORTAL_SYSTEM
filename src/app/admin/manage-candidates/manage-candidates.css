@@ -129,14 +129,23 @@
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
-  overflow-x: auto;
+  overflow-x: scroll;
+  overflow-y: auto;
+  max-width: 100%;
+  max-height: 70vh;
+  scrollbar-gutter: stable both-edges;
   -webkit-overflow-scrolling: touch;
 }
 
 .mc-candidates-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 980px;
+  min-width: 1220px;
+}
+
+.mc-candidates-table th,
+.mc-candidates-table td {
+  white-space: nowrap;
 }
 
 .mc-candidates-table thead {
@@ -194,6 +203,25 @@
 .mc-actions {
   display: flex;
   gap: 8px;
+  white-space: nowrap;
+}
+
+.mc-candidates-table th:last-child,
+.mc-candidates-table td:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  background: #ffffff;
+}
+
+.mc-candidates-table thead th:last-child {
+  z-index: 3;
+  background: #f8fafc;
+  box-shadow: -8px 0 10px -8px rgba(15, 23, 42, 0.2);
+}
+
+.mc-candidates-table tbody td:last-child {
+  box-shadow: -8px 0 10px -8px rgba(15, 23, 42, 0.18);
 }
 
 .mc-actions button {

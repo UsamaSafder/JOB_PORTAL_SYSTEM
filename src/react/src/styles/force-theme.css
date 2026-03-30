@@ -275,6 +275,13 @@ textarea:focus,
   border: 1px solid rgba(17, 24, 39, 0.14) !important;
 }
 
+.table-container,
+.mc-table-container {
+  overflow-x: scroll !important;
+  overflow-y: auto !important;
+  scrollbar-gutter: stable both-edges;
+}
+
 table th {
   background: linear-gradient(180deg, #ffe8e8, #ffdede) !important;
   color: #7f1d1d !important;
@@ -392,4 +399,45 @@ table tr:hover {
 .job-item::before,
 .candidate-card::before {
   background: linear-gradient(180deg, rgba(180, 35, 24, 0.84), rgba(3, 105, 161, 0.82)) !important;
+}
+
+/* Force admin sidebar to match employee sidebar style */
+.admin-layout-container .admin-sidebar {
+  background: linear-gradient(180deg, #0b132b 0%, #1c2541 52%, #1d4ed8 100%) !important;
+  color: #f8fbff !important;
+}
+
+.admin-layout-container .admin-sidebar-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.admin-layout-container .admin-sidebar-header h2 {
+  color: #f8fbff !important;
+}
+
+.admin-layout-container .admin-toggle-btn {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+  border: 0 !important;
+}
+
+.admin-layout-container .admin-nav-item,
+.admin-layout-container .admin-nav-item .label,
+.admin-layout-container .admin-nav-item .icon,
+.admin-layout-container .admin-sidebar .admin-nav-item,
+.admin-layout-container .admin-sidebar .admin-nav-item span,
+.admin-layout-container .admin-sidebar .admin-nav-item a {
+  color: #eef5ff !important;
+}
+
+.admin-layout-container .admin-nav-item:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-left-color: #93c5fd !important;
+  color: #ffffff !important;
+}
+
+.admin-layout-container .admin-nav-item.active {
+  background: linear-gradient(90deg, rgba(14, 165, 233, 0.34), rgba(37, 99, 235, 0.26)) !important;
+  border-left-color: #bfdbfe !important;
+  color: #ffffff !important;
 }

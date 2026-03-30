@@ -45,7 +45,7 @@ function CandidateLayout() {
   const navClassName = ({ isActive }) => `nav-item ${isActive ? 'active' : ''}`;
 
   return (
-    <div className="layout-container">
+    <div className="layout-container candidate-layout">
       <aside className={`sidebar ${!isSidebarOpen ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
           {isSidebarOpen ? <h2>Job Portal</h2> : null}

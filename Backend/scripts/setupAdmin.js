@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 const Admin = require('../models/Admin');
 const { UserDoc, AdminDoc } = require('../models/mongoCollections');
 
 (async () => {
   try {
-    await mongoose.connect('mongodb://localhost:27017/jobportal');
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/job_portal_db';
+    await mongoose.connect(mongoUri);
     
     // First, delete all existing admins to ensure only 1
     const existingAdmins = await AdminDoc.find().lean();

@@ -239,3 +239,39 @@
     display: none;
   }
 }
+
+/* Candidate sidebar color theme */
+.candidate-layout .sidebar {
+  background: linear-gradient(180deg, #0b132b 0%, #1c2541 52%, #1d4ed8 100%);
+  color: #f8fbff;
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.candidate-layout .sidebar-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.candidate-layout .toggle-btn {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.candidate-layout .toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.candidate-layout .nav-item {
+  color: #eef5ff;
+  border-left-color: transparent;
+}
+
+.candidate-layout .nav-item:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-left-color: #93c5fd;
+}
+
+.candidate-layout .nav-item.active {
+  background: linear-gradient(90deg, rgba(14, 165, 233, 0.34), rgba(37, 99, 235, 0.26));
+  border-left-color: #bfdbfe;
+  color: #ffffff;
+}

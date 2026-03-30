@@ -89,7 +89,7 @@ function CompanyLayout() {
   const navClassName = ({ isActive }) => `nav-item ${isActive ? 'active' : ''}`;
 
   return (
-    <div className="layout-container">
+    <div className="layout-container company-layout">
       <aside className={`sidebar ${!isSidebarOpen ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
           {isSidebarOpen ? <h2>{currentCompany?.companyName || 'Company Portal'}</h2> : null}
