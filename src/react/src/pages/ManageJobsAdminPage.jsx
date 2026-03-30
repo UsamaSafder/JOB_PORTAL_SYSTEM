@@ -48,10 +48,18 @@ function ManageJobsAdminPage() {
     });
   }, [filterStatus, filterType, jobs, searchTerm]);
 
-  const getActiveJobs = () => jobs.filter((job) => job.isActive).length;
+  const toSafeCount = (value) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const getActiveJobs = () => toSafeCount(jobs.filter((job) => job.isActive).length);
   const getTotalApplications = () =>
-    jobs.reduce((sum, job) => sum + Number(job.applicationsCount || 0), 0);
-  const getJobsByType = (type) => jobs.filter((job) => job.employmentType === type).length;
+    toSafeCount(jobs.reduce((sum, job) => sum + Number(job.applicationsCount || 0), 0));
+  const getJobsByType = (type) =>
+    toSafeCount(
+      jobs.filter((job) => String(job.employmentType || '').toLowerCase() === String(type || '').toLowerCase()).length
+    );
 
   const isDeadlineNear = (deadline) => {
     if (!deadline) return false;
@@ -137,7 +145,7 @@ function ManageJobsAdminPage() {
       <div className="stats-cards">
         <div className="stat-card total">
           <h3>Total Jobs</h3>
-          <p className="stat-number">{jobs.length}</p>
+          <p className="stat-number">{toSafeCount(jobs.length)}</p>
         </div>
         <div className="stat-card active">
           <h3>Active Jobs</h3>

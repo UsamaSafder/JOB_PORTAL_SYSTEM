@@ -76,24 +76,24 @@
     .stat-card {
       padding: 20px;
       border-radius: 10px;
-      color: white;
+      color: #1f2937 !important;
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
 
     .stat-card.total {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #e7efff 0%, #dbe7ff 100%) !important;
     }
 
     .stat-card.active {
-      background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+      background: linear-gradient(135deg, #def7e8 0%, #d2f0e0 100%) !important;
     }
 
     .stat-card.applications {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      background: linear-gradient(135deg, #e7efff 0%, #dbe7ff 100%) !important;
     }
 
     .stat-card.fulltime {
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      background: linear-gradient(135deg, #e7efff 0%, #dbe7ff 100%) !important;
     }
 
     .stat-card h3 {
@@ -106,6 +106,7 @@
       font-size: 32px;
       font-weight: bold;
       margin: 0;
+      color: #111827 !important;
     }
 
     .table-container {

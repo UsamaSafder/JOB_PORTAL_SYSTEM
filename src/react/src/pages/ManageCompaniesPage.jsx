@@ -53,9 +53,14 @@ function ManageCompaniesPage() {
     });
   }, [companies, searchTerm, filterVerified]);
 
-  const getVerifiedCompanies = () => companies.filter((company) => company.isVerified).length;
-  const getUnverifiedCompanies = () => companies.filter((company) => !company.isVerified).length;
-  const getActiveCompanies = () => companies.filter((company) => company.isActive).length;
+  const toSafeCount = (value) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const getVerifiedCompanies = () => toSafeCount(companies.filter((company) => company.isVerified).length);
+  const getUnverifiedCompanies = () => toSafeCount(companies.filter((company) => !company.isVerified).length);
+  const getActiveCompanies = () => toSafeCount(companies.filter((company) => company.isActive).length);
 
   const updateCompanyInState = (userId, updater) => {
     setCompanies((prev) =>
@@ -154,7 +159,7 @@ function ManageCompaniesPage() {
       <div className="stats-cards">
         <div className="stat-card total">
           <h3>Total Companies</h3>
-          <p className="stat-number">{companies.length}</p>
+          <p className="stat-number">{toSafeCount(companies.length)}</p>
         </div>
         <div className="stat-card verified">
           <h3>Verified Companies</h3>
