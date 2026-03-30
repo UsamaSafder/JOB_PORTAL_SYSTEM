@@ -249,11 +249,11 @@ function SystemLogsPage() {
                 <td className="text-center">{log.userID ?? '-'}</td>
                 <td>{log.userName || 'N/A'}</td>
                 <td>
-                  <div className="action-cell">
-                    <span className={`action-icon ${getActionType(log.action)}`}>
+                  <div className="logs-action-cell">
+                    <span className={`logs-action-icon ${getActionType(log.action)}`}>
                       {getActionIcon(log.action)}
                     </span>
-                    <span className="action-text">{log.action || '-'}</span>
+                    <span className="logs-action-text">{log.action || '-'}</span>
                   </div>
                 </td>
               </tr>

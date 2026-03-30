@@ -61,7 +61,8 @@ class SystemLog {
       const company = companyMap.get(log.UserId);
       return {
         ...toPlain(log),
-        Timestamp: log.CreatedAt ? new Date(log.CreatedAt).toISOString().replace('T', ' ').replace('Z', '').slice(0, 23) : null,
+        // Keep timezone info so frontend relative-time calculations are correct across locales.
+        Timestamp: log.CreatedAt ? new Date(log.CreatedAt).toISOString() : null,
         Email: user?.email || null,
         UserType: user?.role || null,
         UserName: candidate?.FullName || company?.CompanyName || null

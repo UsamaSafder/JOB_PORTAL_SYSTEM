@@ -423,18 +423,26 @@
   color: #065f46;
 }
 
-.action-cell {
+.logs-action-cell {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
-.action-icon {
-  font-size: 16px;
+.logs-action-icon {
+  font-size: 13px;
+  line-height: 1;
+  width: 16px;
+  min-width: 16px;
+  text-align: center;
+  display: inline-block;
 }
 
-.action-text {
+.logs-action-text {
   color: #374151;
+  font-size: 13px;
+  line-height: 1.25;
+  word-break: break-word;
 }
 
 .no-data {
