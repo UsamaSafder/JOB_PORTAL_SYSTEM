@@ -54,7 +54,8 @@ function LoginPage() {
     try {
       const response = await login({
         email: values.email,
-        password: values.password
+        password: values.password,
+        role: selectedUserType
       });
 
       const role = response?.user?.role;
@@ -69,7 +70,12 @@ function LoginPage() {
         navigate('/');
       }
     } catch (error) {
-      setErrorMessage(error?.response?.data?.error || 'Login failed. Please check your credentials.');
+      const apiError = error?.response?.data?.error;
+      if (apiError === 'Selected account type does not match these credentials') {
+        setErrorMessage('Selected account type does not match these credentials. Please choose the correct role and try again.');
+      } else {
+        setErrorMessage(apiError || 'Login failed. Please check your credentials.');
+      }
     } finally {
       setIsLoading(false);
     }

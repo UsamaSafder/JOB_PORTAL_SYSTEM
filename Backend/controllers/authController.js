@@ -133,7 +133,7 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role: selectedRole } = req.body;
 
     console.log('Login attempt for email:', email); // ADD THIS
 
@@ -164,6 +164,12 @@ exports.login = async (req, res) => {
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    if (selectedRole && selectedRole !== role) {
+      return res.status(403).json({
+        error: 'Selected account type does not match these credentials'
+      });
     }
 
     // ... rest of the code

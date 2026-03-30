@@ -21,6 +21,10 @@ const registerValidation = [
 const loginValidation = [
   body('email').isEmail().withMessage('Please provide a valid email'),
   body('password').notEmpty().withMessage('Password is required'),
+  body('role')
+    .optional()
+    .isIn(['admin', 'company', 'candidate'])
+    .withMessage('Invalid role'),
   validate
 ];
 
