@@ -101,11 +101,25 @@ function ManageResumePage() {
         }
       ]);
 
-      const extractedCount = Array.isArray(uploadResult?.extractedFields) ? uploadResult.extractedFields.length : 0;
-      if (extractedCount > 0) {
-        notify(`Resume uploaded. ${extractedCount} profile field(s) auto-filled.`, 'success');
+      const extractedFields = uploadResult?.extractedFields || [];
+      const autoFilledNotice = uploadResult?.autoFilledNotice || '';
+      
+      if (extractedFields.length > 0) {
+        const fieldsList = extractedFields.slice(0, 4).join(', ');
+        const remaining = extractedFields.length > 4 ? ` +${extractedFields.length - 4} more` : '';
+        notify(
+          `✓ Resume uploaded!\n📋 Auto-filled: ${fieldsList}${remaining}`,
+          'success',
+          5000
+        );
+        console.log('Profile fields auto-filled from resume:', extractedFields);
+        console.log('Updated profile:', { resumeLink: profile?.resumeLink, autoFilled: extractedFields });
       } else {
-        notify('Resume uploaded successfully.');
+        notify(
+          '✓ Resume uploaded.\n(No profile fields could be auto-filled from this resume)',
+          'success',
+          4000
+        );
       }
     } catch (error) {
       notify(error?.response?.data?.error || error?.response?.data?.message || 'Failed to upload resume.', 'error');

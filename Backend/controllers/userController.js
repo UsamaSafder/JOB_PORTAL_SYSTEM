@@ -382,6 +382,7 @@ const userController = {
       }
 
       console.log('Final update payload:', JSON.stringify(updatePayload, null, 2));
+      console.log('Auto-filled from resume:', extractedFields);
 
       // Update email in Users table if provided (non-blocking)
       if (req.body.email && String(req.body.email).trim()) {
@@ -421,12 +422,19 @@ const userController = {
 
       console.log('========== UPDATE CANDIDATE PROFILE SUCCESS ==========\n');
       
-      res.json({
+      const responseBody = {
         success: true,
         message: 'Profile updated successfully',
         candidate: convertToCamelCase(updatedCandidate),
-        extractedFields
-      });
+        extractedFields: extractedFields || [],
+        extractedData: extractedData || {}
+      };
+      
+      if (extractedFields && extractedFields.length > 0) {
+        responseBody.autoFilledNotice = `${extractedFields.length} profile field(s) were auto-filled from your resume: ${extractedFields.join(', ')}`;
+      }
+      
+      res.json(responseBody);
     } catch (error) {
       console.error('\n');
       console.error('========== UPDATE CANDIDATE PROFILE ERROR ==========');
