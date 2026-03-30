@@ -221,14 +221,6 @@ function ScheduleInterviewPage() {
           ></textarea>
         </div>
 
-        <div className="notice-box">
-          <div className="notice-icon">ℹ️</div>
-          <div className="notice-content">
-            <strong>Important:</strong> The candidate will be notified via email about the interview details. Please
-            ensure all information is correct before scheduling.
-          </div>
-        </div>
-
         <div className="form-actions">
           <button type="button" className="btn-secondary" onClick={onCancel} disabled={loading}>
             Cancel

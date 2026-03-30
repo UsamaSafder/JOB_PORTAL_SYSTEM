@@ -24,7 +24,14 @@ class Job {
     if (!job) return null;
     const [company, applicationsCount] = await Promise.all([
       CompanyDoc.findOne({ CompanyID: job.CompanyID }).lean(),
-      ApplicationDoc.countDocuments({ JobID: job.JobID })
+      ApplicationDoc.countDocuments({
+        $or: [
+          { JobID: job.JobID },
+          { JobID: String(job.JobID) },
+          { jobId: job.JobID },
+          { jobId: String(job.JobID) }
+        ]
+      })
     ]);
     return {
       ...toPlain(job),
@@ -62,11 +69,19 @@ class Job {
     const companies = await CompanyDoc.find({ CompanyID: { $in: docs.map((j) => j.CompanyID) } }).lean();
     const companyMap = new Map(companies.map((c) => [c.CompanyID, c]));
     const jobIds = docs.map((j) => j.JobID);
+    const jobKeys = jobIds.map((id) => String(id));
     const applicationsByJob = await ApplicationDoc.aggregate([
-      { $match: { JobID: { $in: jobIds } } },
-      { $group: { _id: '$JobID', count: { $sum: 1 } } }
+      {
+        $addFields: {
+          _jobKey: {
+            $toString: { $ifNull: ['$JobID', '$jobId'] }
+          }
+        }
+      },
+      { $match: { _jobKey: { $in: jobKeys } } },
+      { $group: { _id: '$_jobKey', count: { $sum: 1 } } }
     ]);
-    const applicationCountMap = new Map(applicationsByJob.map((item) => [Number(item._id), Number(item.count) || 0]));
+    const applicationCountMap = new Map(applicationsByJob.map((item) => [String(item._id), Number(item.count) || 0]));
 
     return docs.map((job) => {
       const company = companyMap.get(job.CompanyID);
@@ -76,7 +91,7 @@ class Job {
         CompanyName: company?.CompanyName,
         CompanyLocation: company?.Location,
         Logo: company?.Logo,
-        ApplicationsCount: applicationCountMap.get(job.JobID) || 0
+        ApplicationsCount: applicationCountMap.get(String(job.JobID)) || 0
       };
     });
   }

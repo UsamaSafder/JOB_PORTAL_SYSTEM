@@ -115,13 +115,13 @@
   100% { transform: rotate(360deg); }
 }
 
-.applications-list {
+.ma-applications-list {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.application-card {
+.ma-application-card {
   background: linear-gradient(160deg, #ffffff, #f8fbff);
   border-radius: 16px;
   border: 1px solid #dde7f5;
@@ -130,12 +130,12 @@
   transition: all 0.3s;
 }
 
-.application-card:hover {
+.ma-application-card:hover {
   box-shadow: 0 14px 28px rgba(30, 64, 175, 0.14);
   transform: translateY(-2px);
 }
 
-.card-header {
+.ma-card-header {
   padding: 20px 22px;
   border-bottom: 1px solid #e7edf7;
   display: flex;
@@ -143,7 +143,7 @@
   gap: 14px;
 }
 
-.company-logo {
+.ma-company-logo {
   width: 56px;
   height: 56px;
   background: linear-gradient(135deg, #1d4ed8 0%, #06b6d4 100%);
@@ -157,32 +157,32 @@
   flex-shrink: 0;
 }
 
-.company-logo-image {
+.ma-company-logo-image {
   object-fit: cover;
   object-position: center;
   border: 2px solid #dbeafe;
   background: #ffffff;
 }
 
-.job-info {
+.ma-job-info {
   flex: 1;
 }
 
-.job-info h3 {
+.ma-job-info h3 {
   font-size: 1.7rem;
   line-height: 1.25;
   color: #0f172a;
   margin: 0 0 5px 0;
 }
 
-.company-name {
+.ma-company-name {
   color: #2563eb;
   font-size: 1rem;
   margin: 0;
   font-weight: 600;
 }
 
-.status-badge {
+.ma-status-badge {
   padding: 8px 14px;
   border-radius: 25px;
   font-size: 0.9rem;
@@ -215,18 +215,18 @@
   color: #721c24;
 }
 
-.card-body {
+.ma-card-body {
   padding: 20px 22px;
 }
 
-.info-grid {
+.ma-info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 14px;
   margin-bottom: 14px;
 }
 
-.info-item {
+.ma-info-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -236,19 +236,19 @@
   padding: 10px 12px;
 }
 
-.info-label {
+.ma-info-label {
   color: #666;
   font-size: 0.9rem;
   font-weight: 500;
 }
 
-.info-value {
+.ma-info-value {
   color: #0f172a;
   font-size: 1.05rem;
   font-weight: 600;
 }
 
-.feedback-section {
+.ma-feedback-section {
   margin-top: 20px;
   padding: 15px;
   background: #f8f9fa;
@@ -256,19 +256,19 @@
   border-radius: 6px;
 }
 
-.feedback-section h4 {
+.ma-feedback-section h4 {
   color: #333;
   margin: 0 0 10px 0;
   font-size: 1rem;
 }
 
-.feedback-section p {
+.ma-feedback-section p {
   color: #666;
   margin: 0;
   line-height: 1.6;
 }
 
-.card-footer {
+.ma-card-footer {
   padding: 16px 22px;
   background: #f5f9ff;
   border-top: 1px solid #e7edf7;
@@ -278,7 +278,7 @@
   gap: 15px;
 }
 
-.btn-view {
+.ma-btn-view {
   background: linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%);
   color: white;
   padding: 10px 25px;
@@ -288,11 +288,11 @@
   transition: transform 0.3s;
 }
 
-.btn-view:hover {
+.ma-btn-view:hover {
   transform: scale(1.05);
 }
 
-.btn-withdraw {
+.ma-btn-withdraw {
   background: linear-gradient(135deg, #dc2626, #b91c1c);
   color: white;
   border: none;
@@ -303,7 +303,7 @@
   transition: background 0.3s;
 }
 
-.btn-withdraw:hover {
+.ma-btn-withdraw:hover {
   background: #c82333;
 }
 
@@ -357,24 +357,24 @@
     width: 100%;
   }
 
-  .card-header {
+  .ma-card-header {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .status-badge {
+  .ma-status-badge {
     align-self: flex-start;
   }
 
-  .info-grid {
+  .ma-info-grid {
     grid-template-columns: 1fr;
   }
 
-  .card-footer {
+  .ma-card-footer {
     flex-direction: column;
   }
 
-  .btn-view, .btn-withdraw {
+  .ma-btn-view, .ma-btn-withdraw {
     width: 100%;
     text-align: center;
   }

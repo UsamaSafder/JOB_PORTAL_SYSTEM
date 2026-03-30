@@ -126,66 +126,66 @@ function MyApplicationsPage() {
       ) : null}
 
       {!loading && filteredApplications.length > 0 ? (
-        <div className="applications-list">
+        <div className="ma-applications-list">
           {filteredApplications.map((application) => (
-            <div key={application.applicationId} className="application-card">
-              <div className="card-header">
+            <div key={application.applicationId} className="ma-application-card">
+              <div className="ma-card-header">
                 {toPublicFileUrl(application.companyLogo || application.logo) ? (
                   <img
                     src={toPublicFileUrl(application.companyLogo || application.logo)}
                     alt={application.companyName || 'Company'}
-                    className="company-logo company-logo-image"
+                    className="ma-company-logo ma-company-logo-image"
                   />
                 ) : (
-                  <div className="company-logo">{(application.companyName || 'C').charAt(0)}</div>
+                  <div className="ma-company-logo">{(application.companyName || 'C').charAt(0)}</div>
                 )}
-                <div className="job-info">
+                <div className="ma-job-info">
                   <h3>{application.jobTitle}</h3>
-                  <p className="company-name">{application.companyName}</p>
+                  <p className="ma-company-name">{application.companyName}</p>
                 </div>
-                <span className={`status-badge ${getStatusClass(application.status)}`}>
+                <span className={`ma-status-badge ${getStatusClass(application.status)}`}>
                   {getStatusIcon(application.status)} {application.status}
                 </span>
               </div>
 
-              <div className="card-body">
-                <div className="info-grid">
-                  <div className="info-item">
-                    <span className="info-label">📅 Applied Date:</span>
-                    <span className="info-value">
+              <div className="ma-card-body">
+                <div className="ma-info-grid">
+                  <div className="ma-info-item">
+                    <span className="ma-info-label">📅 Applied Date:</span>
+                    <span className="ma-info-value">
                       {application.appliedAt ? new Date(application.appliedAt).toLocaleDateString() : '-'}
                     </span>
                   </div>
-                  <div className="info-item">
-                    <span className="info-label">📍 Location:</span>
-                    <span className="info-value">{application.jobLocation || 'Remote'}</span>
+                  <div className="ma-info-item">
+                    <span className="ma-info-label">📍 Location:</span>
+                    <span className="ma-info-value">{application.jobLocation || 'Remote'}</span>
                   </div>
-                  <div className="info-item">
-                    <span className="info-label">💼 Job Type:</span>
-                    <span className="info-value">{application.employmentType || 'Full-time'}</span>
+                  <div className="ma-info-item">
+                    <span className="ma-info-label">💼 Job Type:</span>
+                    <span className="ma-info-value">{application.employmentType || 'Full-time'}</span>
                   </div>
-                  <div className="info-item">
-                    <span className="info-label">💰 Salary:</span>
-                    <span className="info-value">{application.salaryRange || 'Not specified'}</span>
+                  <div className="ma-info-item">
+                    <span className="ma-info-label">💰 Salary:</span>
+                    <span className="ma-info-value">{application.salaryRange || 'Not specified'}</span>
                   </div>
                 </div>
 
                 {application.feedback || application.notes ? (
-                  <div className="feedback-section">
+                  <div className="ma-feedback-section">
                     <h4>Feedback:</h4>
                     <p>{application.feedback || application.notes}</p>
                   </div>
                 ) : null}
               </div>
 
-              <div className="card-footer">
-                <Link to={`/candidate/job-details/${application.jobId}`} className="btn-view">
+              <div className="ma-card-footer">
+                <Link to={`/candidate/job-details/${application.jobId}`} className="ma-btn-view">
                   View Job Details
                 </Link>
                 {['pending', 'reviewed'].includes(String(application.status || '').toLowerCase()) ? (
                   <button
                     onClick={() => handleWithdraw(application.applicationId)}
-                    className="btn-withdraw"
+                    className="ma-btn-withdraw"
                   >
                     Withdraw
                   </button>
