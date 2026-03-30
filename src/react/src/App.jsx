@@ -24,6 +24,7 @@ import MyApplicationsPage from './pages/MyApplicationsPage';
 import CandidateProfilePage from './pages/CandidateProfilePage';
 import ManageResumePage from './pages/ManageResumePage';
 import MyInterviewsPage from './pages/MyInterviewsPage';
+import './styles/force-theme.css';
 
 function App() {
   return (
