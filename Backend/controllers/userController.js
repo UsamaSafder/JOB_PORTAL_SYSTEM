@@ -620,6 +620,8 @@ const userController = {
   // Get dashboard stats (Admin only)
   getAdminDashboardStats: async (req, res) => {
     try {
+      const now = new Date();
+
       const [
         totalCompanies,
         totalCandidates,
@@ -633,7 +635,10 @@ const userController = {
         CompanyDoc.countDocuments(),
         CandidateDoc.countDocuments(),
         JobDoc.countDocuments(),
-        JobDoc.countDocuments({ IsActive: true }),
+        JobDoc.countDocuments({
+          IsActive: true,
+          $or: [{ Deadline: null }, { Deadline: { $gte: now } }]
+        }),
         ApplicationDoc.countDocuments(),
         ApplicationDoc.countDocuments({ Status: 'Pending' }),
         UserDoc.countDocuments({ isActive: true }),

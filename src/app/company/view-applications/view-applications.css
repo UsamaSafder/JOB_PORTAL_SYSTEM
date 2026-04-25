@@ -314,6 +314,16 @@
   gap: 10px;
 }
 
+/* Keep the details button compact even when global button styles are loaded. */
+.application-actions > .btn-view {
+  align-self: flex-start !important;
+  width: auto !important;
+  flex: 0 0 auto !important;
+  padding: 8px 14px !important;
+  font-size: 12px !important;
+  line-height: 1.2;
+}
+
 .status-actions {
   display: flex;
   gap: 10px;

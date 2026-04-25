@@ -1,3 +1,206 @@
+/* --- Modern Post New Job UI Redesign --- */
+.post-job-modern-outer {
+  min-height: 100vh;
+  background: linear-gradient(120deg, #f8fafc 0%, #e0e7ff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.post-job-modern-card {
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 8px 32px rgba(60, 72, 100, 0.15);
+  padding: 0 0 32px 0;
+  width: 100%;
+  max-width: 650px;
+  position: relative;
+  overflow: hidden;
+}
+.post-job-modern-accent {
+  height: 8px;
+  width: 100%;
+  background: linear-gradient(90deg, #6366f1 0%, #3b82f6 100%);
+  border-radius: 22px 22px 0 0;
+  margin-bottom: 0.5rem;
+}
+.post-job-modern-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 32px 32px 0 32px;
+}
+.post-job-modern-icon {
+  font-size: 2.2rem;
+  background: linear-gradient(135deg, #6366f1 0%, #60a5fa 100%);
+  color: #fff;
+  border-radius: 50%;
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px #6366f133;
+}
+.post-job-modern-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #2d3a5a;
+  margin-bottom: 0.1em;
+  letter-spacing: 0.5px;
+}
+.post-job-modern-subtitle {
+  color: #4b5563;
+  font-size: 1.08rem;
+  margin-bottom: 0.2em;
+}
+.post-job-modern-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0 32px;
+}
+.post-job-modern-row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.post-job-modern-field {
+  flex: 1 1 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+.post-job-modern-field-wide {
+  flex-basis: 100%;
+}
+
+/* Floating label fix for all input types */
+.post-job-modern-label {
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  background: #fff;
+  padding: 0 4px;
+  color: #2563eb;
+  font-size: 1rem;
+  font-weight: 500;
+  pointer-events: none;
+  transition: 0.2s;
+  opacity: 0.95;
+  z-index: 2;
+}
+.post-job-modern-input:focus + .post-job-modern-label,
+.post-job-modern-input:not(:placeholder-shown) + .post-job-modern-label,
+.post-job-modern-input.filled + .post-job-modern-label {
+  top: -13px;
+  left: 10px;
+  font-size: 0.92rem;
+  color: #3b82f6;
+  background: #fff;
+  opacity: 1;
+}
+.post-job-modern-input {
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  padding: 18px 16px 10px 16px;
+  font-size: 1rem;
+  background: #f9fafb;
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+  margin-bottom: 0.5rem;
+  color: #222b45;
+}
+.post-job-modern-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px #6366f133;
+  color: #222b45;
+}
+.post-job-modern-input.invalid {
+  border-color: #e11d48;
+}
+
+/* Ensure select, textarea, and date fields get floating label effect */
+.post-job-modern-input[type="date"],
+.post-job-modern-input[type="text"],
+.post-job-modern-input[type="number"],
+.post-job-modern-input[type="email"],
+.post-job-modern-input[type="password"],
+.post-job-modern-input,
+.post-job-modern-input.filled {
+  background: #f9fafb;
+  color: #222b45;
+}
+.post-job-modern-input:focus + .post-job-modern-label,
+.post-job-modern-input.filled + .post-job-modern-label {
+  top: -13px;
+  left: 10px;
+  font-size: 0.92rem;
+  color: #3b82f6;
+  background: #fff;
+  opacity: 1;
+}
+.post-job-modern-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px #6366f133;
+}
+.post-job-modern-input.invalid {
+  border-color: #e11d48;
+}
+.post-job-modern-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 18px;
+}
+.post-job-modern-btn {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.post-job-modern-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.post-job-modern-btn-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px #6366f122;
+}
+.post-job-modern-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+  box-shadow: 0 4px 12px #6366f144;
+}
+.post-job-modern-btn-secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+.post-job-modern-btn-secondary:hover:not(:disabled) {
+  background: #d1d5db;
+}
+@media (max-width: 700px) {
+  .post-job-modern-card {
+    padding: 0 0 12px 0;
+  }
+  .post-job-modern-header {
+    padding: 18px 10px 0 10px;
+  }
+  .post-job-modern-form {
+    padding: 0 10px;
+  }
+  .post-job-modern-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
 /* src/app/company/post-job/post-job.component.css */
 
 .post-job-container {

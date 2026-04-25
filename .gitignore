@@ -5,11 +5,23 @@
 /tmp
 /out-tsc
 /bazel-out
+/build
+dist/
+build/
+.next/
+out/
+.vercel/
 
 # Node
 /node_modules
+node_modules/
 npm-debug.log
 yarn-error.log
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # IDEs and editors
 .idea/
@@ -19,6 +31,7 @@ yarn-error.log
 *.launch
 .settings/
 *.sublime-workspace
+.vscode/
 
 # Visual Studio Code
 .vscode/*
@@ -33,11 +46,23 @@ yarn-error.log
 .sass-cache/
 /connect.lock
 /coverage
+/coverage/
 /libpeerconnection.log
 testem.log
 /typings
 __screenshots__/
+.cache/
+.eslintcache
+*.tsbuildinfo
+.parcel-cache/
 
 # System files
 .DS_Store
 Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
