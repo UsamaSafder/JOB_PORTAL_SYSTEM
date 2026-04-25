@@ -16,11 +16,17 @@ function SystemLogsPage() {
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState(null);
   const { toast, notify, dismissToast } = useDialog();
 
-  const refreshLogs = async () => {
-    setErrorMessage('');
-    setLoading(true);
+  const refreshLogs = async (options = {}) => {
+    const { silent = false } = options;
+
+    if (!silent) {
+      setErrorMessage('');
+      setLoading(true);
+    }
+
     try {
       const data = await getSystemLogs(1000);
       const normalized = (Array.isArray(data) ? data : []).map((log) => ({
@@ -29,21 +35,42 @@ function SystemLogsPage() {
         userID: log.userId,
         logID: log.logID || log.logId
       }));
+
       setLogs(normalized);
-      if (normalized.length === 0) {
+
+      if (!silent && normalized.length === 0) {
         notify('No logs found in the database yet.', 'info');
+      }
+
+      setLastUpdatedAt(new Date());
+
+      if (silent && errorMessage) {
+        setErrorMessage('');
       }
     } catch (error) {
       const msg = error?.response?.data?.error || 'Failed to load system logs.';
-      setErrorMessage(msg);
-      notify(msg, 'error');
+
+      if (!silent) {
+        setErrorMessage(msg);
+        notify(msg, 'error');
+      }
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    refreshLogs();
+    refreshLogs({ silent: false });
+
+    const timerId = setInterval(() => {
+      refreshLogs({ silent: true });
+    }, 1000);
+
+    return () => {
+      clearInterval(timerId);
+    };
   }, []);
 
   const filteredLogs = useMemo(() => {
@@ -215,7 +242,10 @@ function SystemLogsPage() {
       <div className="table-container">
         <div className="table-header">
           <h3>Activity Log</h3>
-          <span className="log-count">Showing {filteredLogs.length} of {logs.length} logs</span>
+          <span className="log-count">
+            Showing {filteredLogs.length} of {logs.length} logs
+            {lastUpdatedAt ? ` • Live updated ${formatRelativeTime(lastUpdatedAt)}` : ''}
+          </span>
         </div>
 
         <table className="logs-table">

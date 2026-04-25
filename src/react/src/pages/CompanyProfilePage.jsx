@@ -247,13 +247,13 @@ function CompanyProfilePage() {
               <img
                 src={companyLogoUrl}
                 alt="Company logo"
-                className="company-logo"
+                className="company-header-logo"
                 onError={() => setLogoLoadError(true)}
               />
             ) : (
-              <div className="company-logo">{(company.companyName || 'C').charAt(0)}</div>
+              <div className="company-header-logo">{(company.companyName || 'C').charAt(0)}</div>
             )}
-            <div className="company-main-info">
+            <div className="company-main-info company-header-info">
               <h2>{company.companyName}</h2>
               <p className="company-tagline">{company.industry || 'Industry'} | {company.location || 'Location'}</p>
               <p className="company-member-since">
@@ -268,7 +268,7 @@ function CompanyProfilePage() {
               />
               <button
                 type="button"
-                className="btn-edit"
+                className="btn-edit company-header-logo-btn"
                 onClick={() => logoInputRef.current?.click()}
                 disabled={uploadingLogo}
               >

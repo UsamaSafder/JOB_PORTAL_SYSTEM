@@ -28,6 +28,15 @@ function ManageJobsAdminPage() {
     loadJobs();
   }, []);
 
+  const isJobExpired = (deadline) => {
+    if (!deadline) return false;
+    const parsed = new Date(deadline);
+    if (Number.isNaN(parsed.getTime())) return false;
+    return parsed.getTime() < Date.now();
+  };
+
+  const isJobCurrentlyActive = (job) => Boolean(job?.isActive) && !isJobExpired(job?.deadline);
+
   const filteredJobs = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
 
@@ -41,8 +50,8 @@ function ManageJobsAdminPage() {
       const matchesType = filterType === 'all' || (job.employmentType || '') === filterType;
       const matchesStatus =
         filterStatus === 'all' ||
-        (filterStatus === 'active' && job.isActive) ||
-        (filterStatus === 'inactive' && !job.isActive);
+        (filterStatus === 'active' && isJobCurrentlyActive(job)) ||
+        (filterStatus === 'inactive' && !isJobCurrentlyActive(job));
 
       return matchesSearch && matchesType && matchesStatus;
     });
@@ -53,7 +62,7 @@ function ManageJobsAdminPage() {
     return Number.isFinite(n) ? n : 0;
   };
 
-  const getActiveJobs = () => toSafeCount(jobs.filter((job) => job.isActive).length);
+  const getActiveJobs = () => toSafeCount(jobs.filter((job) => isJobCurrentlyActive(job)).length);
   const getTotalApplications = () =>
     toSafeCount(jobs.reduce((sum, job) => sum + Number(job.applicationsCount || 0), 0));
   const getJobsByType = (type) =>
@@ -203,8 +212,8 @@ function ManageJobsAdminPage() {
                   </span>
                 </td>
                 <td>
-                  <span className={`status-badge ${job.isActive ? 'active' : 'inactive'}`}>
-                    {job.isActive ? 'Active' : 'Inactive'}
+                  <span className={`status-badge ${isJobCurrentlyActive(job) ? 'active' : 'inactive'}`}>
+                    {isJobCurrentlyActive(job) ? 'Active' : isJobExpired(job.deadline) ? 'Expired' : 'Inactive'}
                   </span>
                 </td>
                 <td className="actions">
@@ -312,8 +321,12 @@ function ManageJobsAdminPage() {
                 <div className="detail-row">
                   <span className="label">Status:</span>
                   <span className="value">
-                    <span className={`status-badge ${selectedJob.isActive ? 'active' : 'inactive'}`}>
-                      {selectedJob.isActive ? 'Active' : 'Inactive'}
+                    <span className={`status-badge ${isJobCurrentlyActive(selectedJob) ? 'active' : 'inactive'}`}>
+                      {isJobCurrentlyActive(selectedJob)
+                        ? 'Active'
+                        : isJobExpired(selectedJob.deadline)
+                          ? 'Expired'
+                          : 'Inactive'}
                     </span>
                   </span>
                 </div>

@@ -127,121 +127,72 @@ function PostJobPage() {
   };
 
   return (
-    <div className="post-job-container">
-      <div className="header">
-        <h1>{isEditMode ? 'Edit Job' : 'Post New Job'}</h1>
-        <p className="subtitle">
-          {isEditMode ? 'Update the job details' : 'Fill in the details to create a new job posting'}
-        </p>
+    <div className="post-job-modern-outer">
+      <div className="post-job-modern-card">
+        <div className="post-job-modern-accent"></div>
+        <div className="post-job-modern-header">
+          <span className="post-job-modern-icon">💼</span>
+          <div>
+            <h1 className="post-job-modern-title">{isEditMode ? 'Edit Job' : 'Post New Job'}</h1>
+            <p className="post-job-modern-subtitle">{isEditMode ? 'Update the job details' : 'Fill in the details to create a new job posting'}</p>
+          </div>
+        </div>
+        {successMessage ? <div className="alert alert-success">✓ {successMessage}</div> : null}
+        {errorMessage ? <div className="alert alert-error">✕ {errorMessage}</div> : null}
+        <form onSubmit={onSubmit} className="post-job-modern-form">
+          <div className="post-job-modern-row">
+            <div className="post-job-modern-field">
+              <input type="text" id="title" className={`post-job-modern-input${values.title ? ' filled' : ''} ${submitted && errors.title ? 'invalid' : ''}`} value={values.title} onChange={e => setField('title', e.target.value)} required />
+              <label htmlFor="title" className="post-job-modern-label">Job Title <span>*</span></label>
+              {submitted && errors.title ? <div className="error-message">{errors.title}</div> : null}
+            </div>
+            <div className="post-job-modern-field">
+              <input type="text" id="location" className={`post-job-modern-input${values.location ? ' filled' : ''} ${submitted && errors.location ? 'invalid' : ''}`} value={values.location} onChange={e => setField('location', e.target.value)} required />
+              <label htmlFor="location" className="post-job-modern-label">Location <span>*</span></label>
+              {submitted && errors.location ? <div className="error-message">{errors.location}</div> : null}
+            </div>
+          </div>
+          <div className="post-job-modern-row">
+            <div className="post-job-modern-field">
+              <label htmlFor="employmentType" className="post-job-modern-label">Employment Type <span>*</span></label>
+              <select id="employmentType" className={`post-job-modern-input${values.employmentType ? ' filled' : ''} ${submitted && errors.employmentType ? 'invalid' : ''}`} value={values.employmentType} onChange={e => setField('employmentType', e.target.value)} required>
+                {EMPLOYMENT_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+              </select>
+              {submitted && errors.employmentType ? <div className="error-message">{errors.employmentType}</div> : null}
+            </div>
+            <div className="post-job-modern-field">
+              <input type="text" id="salaryRange" className={`post-job-modern-input${values.salaryRange ? ' filled' : ''} ${submitted && errors.salaryRange ? 'invalid' : ''}`} value={values.salaryRange} onChange={e => setField('salaryRange', e.target.value)} required />
+              <label htmlFor="salaryRange" className="post-job-modern-label">Salary Range <span>*</span></label>
+              {submitted && errors.salaryRange ? <div className="error-message">{errors.salaryRange}</div> : null}
+            </div>
+            <div className="post-job-modern-field">
+              <label htmlFor="deadline" className="post-job-modern-label">Application Deadline <span>*</span></label>
+              <input type="date" id="deadline" className={`post-job-modern-input${values.deadline ? ' filled' : ''} ${submitted && errors.deadline ? 'invalid' : ''}`} value={values.deadline} onChange={e => setField('deadline', e.target.value)} required />
+              {submitted && errors.deadline ? <div className="error-message">{errors.deadline}</div> : null}
+            </div>
+          </div>
+          <div className="post-job-modern-row">
+            <div className="post-job-modern-field post-job-modern-field-wide">
+              <textarea id="description" className={`post-job-modern-input${values.description ? ' filled' : ''} ${submitted && errors.description ? 'invalid' : ''}`} rows={4} value={values.description} onChange={e => setField('description', e.target.value)} required />
+              <label htmlFor="description" className="post-job-modern-label">Job Description <span>*</span></label>
+              {submitted && errors.description ? <div className="error-message">{errors.description}</div> : null}
+            </div>
+          </div>
+          <div className="post-job-modern-row">
+            <div className="post-job-modern-field post-job-modern-field-wide">
+              <textarea id="requirements" className={`post-job-modern-input${values.requirements ? ' filled' : ''} ${submitted && errors.requirements ? 'invalid' : ''}`} rows={3} value={values.requirements} onChange={e => setField('requirements', e.target.value)} required />
+              <label htmlFor="requirements" className="post-job-modern-label">Requirements <span>*</span></label>
+              {submitted && errors.requirements ? <div className="error-message">{errors.requirements}</div> : null}
+            </div>
+          </div>
+          <div className="post-job-modern-actions">
+            <button type="button" className="post-job-modern-btn post-job-modern-btn-secondary" onClick={resetForm} disabled={loading}>Reset</button>
+            <button type="submit" className="post-job-modern-btn post-job-modern-btn-primary" disabled={loading}>
+              {!loading ? (isEditMode ? 'Update Job' : 'Post Job') : (isEditMode ? 'Updating...' : 'Posting...')}
+            </button>
+          </div>
+        </form>
       </div>
-
-      {successMessage ? <div className="alert alert-success">✓ {successMessage}</div> : null}
-      {errorMessage ? <div className="alert alert-error">✕ {errorMessage}</div> : null}
-
-      <form onSubmit={onSubmit} className="job-form">
-        <div className="form-group">
-          <label htmlFor="title">Job Title <span className="required">*</span></label>
-          <input
-            type="text"
-            id="title"
-            className={`form-control ${submitted && errors.title ? 'invalid' : ''}`}
-            placeholder="e.g., Senior Software Engineer"
-            value={values.title}
-            onChange={(e) => setField('title', e.target.value)}
-          />
-          {submitted && errors.title ? <div className="error-message">{errors.title}</div> : null}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="location">Location <span className="required">*</span></label>
-          <input
-            type="text"
-            id="location"
-            className={`form-control ${submitted && errors.location ? 'invalid' : ''}`}
-            placeholder="e.g., Lahore, Pakistan"
-            value={values.location}
-            onChange={(e) => setField('location', e.target.value)}
-          />
-          {submitted && errors.location ? <div className="error-message">{errors.location}</div> : null}
-        </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="employmentType">Employment Type <span className="required">*</span></label>
-            <select
-              id="employmentType"
-              className={`form-control ${submitted && errors.employmentType ? 'invalid' : ''}`}
-              value={values.employmentType}
-              onChange={(e) => setField('employmentType', e.target.value)}
-            >
-              {EMPLOYMENT_TYPES.map((type) => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-            {submitted && errors.employmentType ? <div className="error-message">{errors.employmentType}</div> : null}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="salaryRange">Salary Range <span className="required">*</span></label>
-            <input
-              type="text"
-              id="salaryRange"
-              className={`form-control ${submitted && errors.salaryRange ? 'invalid' : ''}`}
-              placeholder="e.g., 80k-100k PKR"
-              value={values.salaryRange}
-              onChange={(e) => setField('salaryRange', e.target.value)}
-            />
-            {submitted && errors.salaryRange ? <div className="error-message">{errors.salaryRange}</div> : null}
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="deadline">Application Deadline <span className="required">*</span></label>
-          <input
-            type="date"
-            id="deadline"
-            className={`form-control ${submitted && errors.deadline ? 'invalid' : ''}`}
-            value={values.deadline}
-            onChange={(e) => setField('deadline', e.target.value)}
-          />
-          {submitted && errors.deadline ? <div className="error-message">{errors.deadline}</div> : null}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="description">Job Description <span className="required">*</span></label>
-          <textarea
-            id="description"
-            className={`form-control ${submitted && errors.description ? 'invalid' : ''}`}
-            rows="6"
-            placeholder="Describe the job responsibilities, work environment, and what makes this position unique..."
-            value={values.description}
-            onChange={(e) => setField('description', e.target.value)}
-          ></textarea>
-          {submitted && errors.description ? <div className="error-message">{errors.description}</div> : null}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="requirements">Requirements <span className="required">*</span></label>
-          <textarea
-            id="requirements"
-            className={`form-control ${submitted && errors.requirements ? 'invalid' : ''}`}
-            rows="6"
-            placeholder="List the required skills, qualifications, and experience..."
-            value={values.requirements}
-            onChange={(e) => setField('requirements', e.target.value)}
-          ></textarea>
-          {submitted && errors.requirements ? <div className="error-message">{errors.requirements}</div> : null}
-        </div>
-
-        <div className="form-actions">
-          <button type="button" className="btn btn-secondary" onClick={resetForm} disabled={loading}>
-            Reset
-          </button>
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {!loading ? (isEditMode ? 'Update Job' : 'Post Job') : (isEditMode ? 'Updating...' : 'Posting...')}
-          </button>
-        </div>
-      </form>
     </div>
   );
 }
