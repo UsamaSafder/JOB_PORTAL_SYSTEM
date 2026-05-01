@@ -196,7 +196,6 @@ function LoginPage() {
                 <input type="checkbox" />
                 <span>Remember me</span>
               </label>
-              <a href="#" className="forgot-link">Forgot Password?</a>
             </div>
 
             {errorMessage ? <div className="alert alert-error">{errorMessage}</div> : null}

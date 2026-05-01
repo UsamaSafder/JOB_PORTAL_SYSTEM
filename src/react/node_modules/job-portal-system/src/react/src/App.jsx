@@ -28,6 +28,7 @@ import CandidateProfilePage from './pages/CandidateProfilePage';
 import CandidateMessagesPage from './pages/CandidateMessagesPage';
 import ManageResumePage from './pages/ManageResumePage';
 import MyInterviewsPage from './pages/MyInterviewsPage';
+import ProtectedRoute from './components/ProtectedRoute';
 import './styles/force-theme.css';
 
 function App() {
@@ -37,37 +38,40 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      <Route path="/company" element={<CompanyLayout />}>
-        <Route path="dashboard" element={<CompanyDashboardPage />} />
-          <Route path="messages" element={<CompanyMessagesPage />} />
-        <Route path="post-job" element={<PostJobPage />} />
-        <Route path="manage-jobs" element={<ManageJobsCompanyPage />} />
-        <Route path="applications" element={<ViewApplicationsPage />} />
-          <Route path="support" element={<CompanySupportPage />} />
-        <Route path="applications/:jobId" element={<ViewApplicationsPage />} />
-        <Route path="application-details/:id" element={<ApplicationDetailsPage />} />
-        <Route path="schedule-interview/:applicationId" element={<ScheduleInterviewPage />} />
-        <Route path="profile" element={<CompanyProfilePage />} />
+      {/* Company Routes - Protected */}
+      <Route path="/company" element={<ProtectedRoute element={<CompanyLayout />} allowedRoles={['company']} />}>
+        <Route path="dashboard" element={<ProtectedRoute element={<CompanyDashboardPage />} allowedRoles={['company']} />} />
+        <Route path="messages" element={<ProtectedRoute element={<CompanyMessagesPage />} allowedRoles={['company']} />} />
+        <Route path="post-job" element={<ProtectedRoute element={<PostJobPage />} allowedRoles={['company']} />} />
+        <Route path="manage-jobs" element={<ProtectedRoute element={<ManageJobsCompanyPage />} allowedRoles={['company']} />} />
+        <Route path="applications" element={<ProtectedRoute element={<ViewApplicationsPage />} allowedRoles={['company']} />} />
+        <Route path="support" element={<ProtectedRoute element={<CompanySupportPage />} allowedRoles={['company']} />} />
+        <Route path="applications/:jobId" element={<ProtectedRoute element={<ViewApplicationsPage />} allowedRoles={['company']} />} />
+        <Route path="application-details/:id" element={<ProtectedRoute element={<ApplicationDetailsPage />} allowedRoles={['company']} />} />
+        <Route path="schedule-interview/:applicationId" element={<ProtectedRoute element={<ScheduleInterviewPage />} allowedRoles={['company']} />} />
+        <Route path="profile" element={<ProtectedRoute element={<CompanyProfilePage />} allowedRoles={['company']} />} />
       </Route>
 
-      <Route path="/candidate" element={<CandidateLayout />}>
-        <Route path="dashboard" element={<CandidateDashboardPage />} />
-        <Route path="browse-jobs" element={<BrowseJobsPage />} />
-        <Route path="job-details/:id" element={<JobDetailsPage />} />
-        <Route path="my-applications" element={<MyApplicationsPage />} />
-        <Route path="profile" element={<CandidateProfilePage />} />
-        <Route path="messages" element={<CandidateMessagesPage />} />
-        <Route path="manage-resume" element={<ManageResumePage />} />
-        <Route path="my-interviews" element={<MyInterviewsPage />} />
+      {/* Candidate Routes - Protected */}
+      <Route path="/candidate" element={<ProtectedRoute element={<CandidateLayout />} allowedRoles={['candidate']} />}>
+        <Route path="dashboard" element={<ProtectedRoute element={<CandidateDashboardPage />} allowedRoles={['candidate']} />} />
+        <Route path="browse-jobs" element={<ProtectedRoute element={<BrowseJobsPage />} allowedRoles={['candidate']} />} />
+        <Route path="job-details/:id" element={<ProtectedRoute element={<JobDetailsPage />} allowedRoles={['candidate']} />} />
+        <Route path="my-applications" element={<ProtectedRoute element={<MyApplicationsPage />} allowedRoles={['candidate']} />} />
+        <Route path="profile" element={<ProtectedRoute element={<CandidateProfilePage />} allowedRoles={['candidate']} />} />
+        <Route path="messages" element={<ProtectedRoute element={<CandidateMessagesPage />} allowedRoles={['candidate']} />} />
+        <Route path="manage-resume" element={<ProtectedRoute element={<ManageResumePage />} allowedRoles={['candidate']} />} />
+        <Route path="my-interviews" element={<ProtectedRoute element={<MyInterviewsPage />} allowedRoles={['candidate']} />} />
       </Route>
 
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route path="dashboard" element={<AdminDashboardPage />} />
-        <Route path="support" element={<AdminSupportPage />} />
-        <Route path="companies" element={<ManageCompaniesPage />} />
-        <Route path="jobs" element={<ManageJobsAdminPage />} />
-        <Route path="candidates" element={<ManageCandidatesPage />} />
-        <Route path="logs" element={<SystemLogsPage />} />
+      {/* Admin Routes - Protected */}
+      <Route path="/admin" element={<ProtectedRoute element={<AdminLayout />} allowedRoles={['admin']} />}>
+        <Route path="dashboard" element={<ProtectedRoute element={<AdminDashboardPage />} allowedRoles={['admin']} />} />
+        <Route path="support" element={<ProtectedRoute element={<AdminSupportPage />} allowedRoles={['admin']} />} />
+        <Route path="companies" element={<ProtectedRoute element={<ManageCompaniesPage />} allowedRoles={['admin']} />} />
+        <Route path="jobs" element={<ProtectedRoute element={<ManageJobsAdminPage />} allowedRoles={['admin']} />} />
+        <Route path="candidates" element={<ProtectedRoute element={<ManageCandidatesPage />} allowedRoles={['admin']} />} />
+        <Route path="logs" element={<ProtectedRoute element={<SystemLogsPage />} allowedRoles={['admin']} />} />
         <Route index element={<Navigate to="dashboard" replace />} />
       </Route>
 

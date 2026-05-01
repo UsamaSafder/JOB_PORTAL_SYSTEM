@@ -42,6 +42,7 @@ router.post('/login', loginValidation, authController.login);
 router.get('/profile', auth, authController.getProfile);
 router.put('/change-password', auth, changePasswordValidation, authController.changePassword);
 router.post('/logout', auth, authController.logout);
+
 router.post('/init-test-users', authController.initializeTestUsers); // For development only
 router.post('/init-test-data', authController.initializeTestData); // For development only
 
