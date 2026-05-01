@@ -30,7 +30,8 @@ const applicationController = {
         jobId: req.body.jobId,
         candidateId: candidate.CandidateID,
         coverLetter: req.body.coverLetter,
-        resumePath: req.file ? toPublicUploadPath(req.file.path) : toPublicUploadPath(candidate.ResumeLink)
+        // Use uploaded file if available, otherwise use candidate's current resume
+        resumePath: req.file ? toPublicUploadPath(req.file.path) : candidate.ResumeLink || null
       };
 
       const application = await Application.create(applicationData);

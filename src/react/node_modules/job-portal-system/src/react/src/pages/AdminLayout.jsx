@@ -55,6 +55,10 @@ function AdminLayout() {
             <span className="icon">📊</span>
             {isSidebarOpen ? <span className="label">Dashboard</span> : null}
           </NavLink>
+          <NavLink to="/admin/support" className={navClassName}>
+            <span className="icon">🛟</span>
+            {isSidebarOpen ? <span className="label">Support Tickets</span> : null}
+          </NavLink>
           <NavLink to="/admin/companies" className={navClassName}>
             <span className="icon">🏢</span>
             {isSidebarOpen ? <span className="label">Companies</span> : null}

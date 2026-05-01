@@ -154,7 +154,7 @@ function PostJobPage() {
           </div>
           <div className="post-job-modern-row">
             <div className="post-job-modern-field">
-              <label htmlFor="employmentType" className="post-job-modern-label">Employment Type <span>*</span></label>
+              <label htmlFor="employmentType" className="post-job-modern-label post-job-modern-label-static">Employment Type <span>*</span></label>
               <select id="employmentType" className={`post-job-modern-input${values.employmentType ? ' filled' : ''} ${submitted && errors.employmentType ? 'invalid' : ''}`} value={values.employmentType} onChange={e => setField('employmentType', e.target.value)} required>
                 {EMPLOYMENT_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
               </select>
@@ -166,7 +166,7 @@ function PostJobPage() {
               {submitted && errors.salaryRange ? <div className="error-message">{errors.salaryRange}</div> : null}
             </div>
             <div className="post-job-modern-field">
-              <label htmlFor="deadline" className="post-job-modern-label">Application Deadline <span>*</span></label>
+              <label htmlFor="deadline" className="post-job-modern-label post-job-modern-label-static">Application Deadline <span>*</span></label>
               <input type="date" id="deadline" className={`post-job-modern-input${values.deadline ? ' filled' : ''} ${submitted && errors.deadline ? 'invalid' : ''}`} value={values.deadline} onChange={e => setField('deadline', e.target.value)} required />
               {submitted && errors.deadline ? <div className="error-message">{errors.deadline}</div> : null}
             </div>

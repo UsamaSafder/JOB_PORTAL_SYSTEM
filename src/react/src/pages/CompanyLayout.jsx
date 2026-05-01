@@ -103,6 +103,14 @@ function CompanyLayout() {
             <span className="icon">📊</span>
             {isSidebarOpen ? <span className="label">Dashboard</span> : null}
           </NavLink>
+          <NavLink to="/company/messages" className={navClassName}>
+            <span className="icon">💬</span>
+            {isSidebarOpen ? <span className="label">Messages</span> : null}
+          </NavLink>
+          <NavLink to="/company/support" className={navClassName}>
+            <span className="icon">🛟</span>
+            {isSidebarOpen ? <span className="label">Support</span> : null}
+          </NavLink>
           <NavLink to="/company/post-job" className={navClassName}>
             <span className="icon">➕</span>
             {isSidebarOpen ? <span className="label">Post New Job</span> : null}

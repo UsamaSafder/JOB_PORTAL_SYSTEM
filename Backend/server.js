@@ -14,6 +14,8 @@ const jobRoutes = require('./routes/jobs');
 const applicationRoutes = require('./routes/applications');
 const userRoutes = require('./routes/users');
 const companyRoutes = require('./routes/companies');
+const messagesRoutes = require('./routes/messages');
+const supportRoutes = require('./routes/support');
 
 // Initialize express app
 const app = express();
@@ -107,6 +109,8 @@ app.use('/api/jobs', jobRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/companies', companyRoutes);
+app.use('/api/messages', messagesRoutes);
+app.use('/api/support', supportRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -160,6 +164,13 @@ const startServer = async () => {
       console.log(`✓ API Base URL: http://localhost:${PORT}/api`);
       console.log(`✓ Welcome page: http://localhost:${PORT}/`);
     });
+
+    // Initialize realtime socket handlers
+    try {
+      require('./realtime/socket')(server);
+    } catch (e) {
+      console.warn('Realtime socket failed to initialize:', e.message);
+    }
 
     // Handle port already in use error
     server.on('error', (err) => {

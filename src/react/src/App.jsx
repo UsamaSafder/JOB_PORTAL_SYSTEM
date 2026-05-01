@@ -4,12 +4,15 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminLayout from './pages/AdminLayout';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminSupportPage from './pages/AdminSupportPage';
 import ManageCompaniesPage from './pages/ManageCompaniesPage';
 import ManageCandidatesPage from './pages/ManageCandidatesPage';
 import ManageJobsAdminPage from './pages/ManageJobsAdminPage';
 import SystemLogsPage from './pages/SystemLogsPage';
 import CompanyLayout from './pages/CompanyLayout';
 import CompanyDashboardPage from './pages/CompanyDashboardPage';
+import CompanyMessagesPage from './pages/CompanyMessagesPage';
+import CompanySupportPage from './pages/CompanySupportPage';
 import PostJobPage from './pages/PostJobPage';
 import ManageJobsCompanyPage from './pages/ManageJobsCompanyPage';
 import ViewApplicationsPage from './pages/ViewApplicationsPage';
@@ -22,6 +25,7 @@ import BrowseJobsPage from './pages/BrowseJobsPage';
 import JobDetailsPage from './pages/JobDetailsPage';
 import MyApplicationsPage from './pages/MyApplicationsPage';
 import CandidateProfilePage from './pages/CandidateProfilePage';
+import CandidateMessagesPage from './pages/CandidateMessagesPage';
 import ManageResumePage from './pages/ManageResumePage';
 import MyInterviewsPage from './pages/MyInterviewsPage';
 import './styles/force-theme.css';
@@ -35,9 +39,11 @@ function App() {
 
       <Route path="/company" element={<CompanyLayout />}>
         <Route path="dashboard" element={<CompanyDashboardPage />} />
+          <Route path="messages" element={<CompanyMessagesPage />} />
         <Route path="post-job" element={<PostJobPage />} />
         <Route path="manage-jobs" element={<ManageJobsCompanyPage />} />
         <Route path="applications" element={<ViewApplicationsPage />} />
+          <Route path="support" element={<CompanySupportPage />} />
         <Route path="applications/:jobId" element={<ViewApplicationsPage />} />
         <Route path="application-details/:id" element={<ApplicationDetailsPage />} />
         <Route path="schedule-interview/:applicationId" element={<ScheduleInterviewPage />} />
@@ -50,12 +56,14 @@ function App() {
         <Route path="job-details/:id" element={<JobDetailsPage />} />
         <Route path="my-applications" element={<MyApplicationsPage />} />
         <Route path="profile" element={<CandidateProfilePage />} />
+        <Route path="messages" element={<CandidateMessagesPage />} />
         <Route path="manage-resume" element={<ManageResumePage />} />
         <Route path="my-interviews" element={<MyInterviewsPage />} />
       </Route>
 
       <Route path="/admin" element={<AdminLayout />}>
         <Route path="dashboard" element={<AdminDashboardPage />} />
+        <Route path="support" element={<AdminSupportPage />} />
         <Route path="companies" element={<ManageCompaniesPage />} />
         <Route path="jobs" element={<ManageJobsAdminPage />} />
         <Route path="candidates" element={<ManageCandidatesPage />} />

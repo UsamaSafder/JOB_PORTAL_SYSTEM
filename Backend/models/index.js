@@ -5,6 +5,9 @@ const Job = require('./Job');
 const Application = require('./Application');
 const Interview = require('./Interview');
 const SystemLog = require('./SystemLog');
+const Conversation = require('./Conversation');
+const Message = require('./Message');
+const SupportTicket = require('./SupportTicket');
 
 module.exports = {
   User,
@@ -14,4 +17,7 @@ module.exports = {
   Application,
   Interview,
   SystemLog
+  ,Conversation,
+  Message,
+  SupportTicket
 };

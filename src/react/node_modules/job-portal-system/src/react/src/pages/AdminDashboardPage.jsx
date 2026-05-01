@@ -207,6 +207,11 @@ function AdminDashboardPage() {
             <h4>System Logs</h4>
             <p>View system activities</p>
           </div>
+          <div className="action-card companies" onClick={() => navigate('/admin/support')}>
+            <span className="action-icon">🛟</span>
+            <h4>Support Tickets</h4>
+            <p>Reply to company issues</p>
+          </div>
         </div>
       </div>
 

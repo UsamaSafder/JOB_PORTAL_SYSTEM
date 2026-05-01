@@ -166,6 +166,53 @@ const systemLogSchema = new mongoose.Schema(
   }
 );
 
+const conversationSchema = new mongoose.Schema(
+  {
+    ConversationID: { type: Number, required: true, unique: true, index: true },
+    CompanyID: { type: Number, required: true, index: true },
+    CandidateID: { type: Number, required: true, index: true },
+    LastMessageAt: { type: Date, default: Date.now }
+  },
+  {
+    timestamps: { createdAt: 'CreatedAt', updatedAt: 'UpdatedAt' },
+    versionKey: false
+  }
+);
+
+const messageSchema = new mongoose.Schema(
+  {
+    MessageID: { type: Number, required: true, unique: true, index: true },
+    ConversationID: { type: Number, required: true, index: true },
+    SenderType: { type: String, enum: ['company', 'candidate', 'admin'], required: true },
+    SenderId: { type: Number, required: true },
+    Text: { type: String, default: '' },
+    FilePath: { type: String, default: null },
+    FileName: { type: String, default: null },
+    Attachments: { type: Array, default: [] },
+    IsRead: { type: Boolean, default: false }
+  },
+  {
+    timestamps: { createdAt: 'CreatedAt', updatedAt: 'UpdatedAt' },
+    versionKey: false
+  }
+);
+
+const supportTicketSchema = new mongoose.Schema(
+  {
+    TicketID: { type: Number, required: true, unique: true, index: true },
+    CompanyID: { type: Number, required: true, index: true },
+    AdminID: { type: Number, default: null },
+    Subject: { type: String, required: true },
+    Description: { type: String, default: null },
+    Status: { type: String, default: 'open' },
+    Replies: { type: Array, default: [] }
+  },
+  {
+    timestamps: { createdAt: 'CreatedAt', updatedAt: 'UpdatedAt' },
+    versionKey: false
+  }
+);
+
 const Counter = mongoose.models.Counter || mongoose.model('Counter', counterSchema);
 const UserDoc = mongoose.models.UserDoc || mongoose.model('UserDoc', userSchema, 'Users');
 const CandidateDoc = mongoose.models.CandidateDoc || mongoose.model('CandidateDoc', candidateSchema, 'Candidates');
@@ -176,6 +223,9 @@ const ApplicationDoc = mongoose.models.ApplicationDoc || mongoose.model('Applica
 const InterviewDoc = mongoose.models.InterviewDoc || mongoose.model('InterviewDoc', interviewSchema, 'Interviews');
 const NotificationDoc = mongoose.models.NotificationDoc || mongoose.model('NotificationDoc', notificationSchema, 'Notifications');
 const SystemLogDoc = mongoose.models.SystemLogDoc || mongoose.model('SystemLogDoc', systemLogSchema, 'SystemLogs');
+const ConversationDoc = mongoose.models.ConversationDoc || mongoose.model('ConversationDoc', conversationSchema, 'Conversations');
+const MessageDoc = mongoose.models.MessageDoc || mongoose.model('MessageDoc', messageSchema, 'Messages');
+const SupportTicketDoc = mongoose.models.SupportTicketDoc || mongoose.model('SupportTicketDoc', supportTicketSchema, 'SupportTickets');
 
 const nextSequence = async (key) => {
   const doc = await Counter.findOneAndUpdate(
@@ -204,6 +254,9 @@ module.exports = {
   InterviewDoc,
   NotificationDoc,
   SystemLogDoc,
+  ConversationDoc,
+  MessageDoc,
+  SupportTicketDoc,
   nextSequence,
   toPlain
 };

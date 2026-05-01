@@ -205,6 +205,10 @@ function CandidateDashboardPage() {
       <div className="quick-actions">
         <h3>Quick Actions</h3>
         <div className="actions-grid">
+          <Link to="/candidate/messages" className="action-card">
+            <span className="action-icon">💬</span>
+            <span className="action-label">Open Messages</span>
+          </Link>
           <Link to="/candidate/browse-jobs" className="action-card">
             <span className="action-icon">🔍</span>
             <span className="action-label">Browse Jobs</span>

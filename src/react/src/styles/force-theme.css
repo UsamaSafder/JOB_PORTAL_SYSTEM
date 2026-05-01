@@ -441,3 +441,29 @@ table tr:hover {
   border-left-color: #bfdbfe !important;
   color: #ffffff !important;
 }
+
+/* Ensure sidebar labels/icons are visible (force white) for all layouts */
+.sidebar *,
+.sidebar .label,
+.sidebar .icon,
+.admin-sidebar *,
+.admin-sidebar .label,
+.admin-sidebar .icon,
+.candidate-layout .sidebar *,
+.company-layout .sidebar * {
+  color: #ffffff !important;
+}
+
+/* Make sidebar header text and toggle button white */
+.sidebar-header h2,
+.admin-sidebar-header h2,
+.sidebar .toggle-btn,
+.admin-sidebar .admin-toggle-btn {
+  color: #ffffff !important;
+}
+
+/* When collapsed, icon-only view still shows white icons */
+.sidebar.collapsed .nav-item .icon,
+.admin-sidebar.collapsed .admin-nav-item .icon {
+  color: #ffffff !important;
+}

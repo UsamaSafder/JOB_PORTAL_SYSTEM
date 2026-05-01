@@ -93,6 +93,15 @@
   opacity: 0.95;
   z-index: 2;
 }
+.post-job-modern-label-static {
+  position: static;
+  left: auto;
+  top: auto;
+  margin: 0 0 2px 0;
+  padding: 0;
+  background: transparent;
+  color: #2563eb;
+}
 .post-job-modern-input:focus + .post-job-modern-label,
 .post-job-modern-input:not(:placeholder-shown) + .post-job-modern-label,
 .post-job-modern-input.filled + .post-job-modern-label {
@@ -132,6 +141,17 @@
 .post-job-modern-input,
 .post-job-modern-input.filled {
   background: #f9fafb;
+  color: #222b45;
+}
+.post-job-modern-input[type="date"] {
+  color-scheme: light;
+}
+.post-job-modern-input[type="date"]::-webkit-datetime-edit,
+.post-job-modern-input[type="date"]::-webkit-datetime-edit-text,
+.post-job-modern-input[type="date"]::-webkit-datetime-edit-month-field,
+.post-job-modern-input[type="date"]::-webkit-datetime-edit-day-field,
+.post-job-modern-input[type="date"]::-webkit-datetime-edit-year-field,
+.post-job-modern-input[type="date"]::-webkit-calendar-picker-indicator {
   color: #222b45;
 }
 .post-job-modern-input:focus + .post-job-modern-label,

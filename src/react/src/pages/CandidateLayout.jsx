@@ -59,6 +59,10 @@ function CandidateLayout() {
             <span className="icon">📊</span>
             {isSidebarOpen ? <span className="label">Dashboard</span> : null}
           </NavLink>
+          <NavLink to="/candidate/messages" className={navClassName}>
+            <span className="icon">💬</span>
+            {isSidebarOpen ? <span className="label">Messages</span> : null}
+          </NavLink>
           <NavLink to="/candidate/browse-jobs" className={navClassName}>
             <span className="icon">🔍</span>
             {isSidebarOpen ? <span className="label">Browse Jobs</span> : null}

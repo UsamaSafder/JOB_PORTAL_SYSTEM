@@ -80,9 +80,15 @@ function ApplicationDetailsPage() {
   const isResumeFilePath = (filePath) => {
     const value = String(filePath || '').trim().toLowerCase();
     if (!value) return false;
-    const isImage = /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?|$)/i.test(value);
-    if (isImage) return false;
-    return /\.(pdf|doc|docx|rtf|txt)(\?|$)/i.test(value) || value.includes('/uploads/resumes/');
+    
+    // Accept any file in uploads/resumes or uploads/profile-pictures (can be resume images)
+    if (value.includes('/uploads/resumes/') || value.includes('/uploads/profile-pictures/')) {
+      return true;
+    }
+    
+    // Accept document and image files (resumes can be PDF, DOC, or image formats)
+    const isDocOrImage = /\.(pdf|doc|docx|rtf|txt|jpg|jpeg|png|gif|webp|bmp|svg)(\?|$)/i.test(value);
+    return isDocOrImage;
   };
 
   const resolveResumePath = () => {

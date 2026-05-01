@@ -230,7 +230,25 @@ function CompanyDashboardPage() {
             )}
           </div>
 
-          <div className="section-card">
+<div className="quick-actions" style={{ marginBottom: '20px' }}>
+        <h3>Quick Actions</h3>
+        <div className="actions-grid">
+          <button className="action-card" onClick={() => navigate('/company/messages')}>
+            <span className="action-icon">💬</span>
+            <span className="action-label">Open Messages</span>
+          </button>
+          <button className="action-card" onClick={() => navigate('/company/support')}>
+            <span className="action-icon">🛟</span>
+            <span className="action-label">Contact Admin Support</span>
+          </button>
+          <button className="action-card" onClick={() => navigate('/company/post-job')}>
+            <span className="action-icon">➕</span>
+            <span className="action-label">Post New Job</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="section-card">
             <div className="section-header">
               <h2>Recent Applications</h2>
               <a href="#" className="link" onClick={(e) => { e.preventDefault(); navigate('/company/applications'); }}>
