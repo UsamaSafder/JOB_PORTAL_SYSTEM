@@ -26,7 +26,7 @@ A comprehensive job portal application built with modern web technologies, featu
 - **JWT Authentication** with role-based access control
 - **Socket.io** for real-time features
 - **Multer** for file uploads
-- **Resume Parsing** with pdf-parse and mammoth libraries
+
 
 ## 📋 Prerequisites
 
