@@ -263,19 +263,25 @@
 
 .job-footer {
   display: flex;
-  gap: 10px;
+  gap: 6px;
+  width: 100%;
 }
 
 .btn-secondary {
-  flex: 1;
-  padding: 10px 16px;
+  flex: 1.3;
+  min-width: 0;
+  padding: 6px 10px;
   background: #f3f4f6;
   border: none;
-  border-radius: 8px;
+  border-radius: 5px;
   cursor: pointer;
   font-weight: 500;
   color: #374151;
+  font-size: 0.85rem;
   transition: background 0.3s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .btn-secondary:hover {
@@ -283,12 +289,18 @@
 }
 
 .btn-toggle {
-  padding: 10px 20px;
+  flex: 0.7;
+  min-width: 0;
+  padding: 6px 8px;
   border: none;
-  border-radius: 8px;
+  border-radius: 5px;
   cursor: pointer;
   font-weight: 500;
+  font-size: 0.8rem;
   transition: all 0.3s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .btn-toggle.activate {
