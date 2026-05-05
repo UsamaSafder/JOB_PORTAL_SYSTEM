@@ -39,6 +39,7 @@ router.put(
 );
 router.get('/candidate/stats', auth, authorize('candidate'), userController.getCandidateStats);
 router.get('/candidate/profile', auth, authorize('candidate'), userController.getCandidateProfile);
+router.get('/candidate/resumes', auth, authorize('candidate'), userController.getCandidateResumes);
 router.delete('/:candidateId/resume', auth, authorize('candidate'), userController.deleteResume);
 
 module.exports = router;

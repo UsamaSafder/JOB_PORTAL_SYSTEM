@@ -53,6 +53,15 @@ function ManageCandidatesPage() {
     return text.length > 35 ? `${text.slice(0, 35)}...` : text;
   };
 
+  const getResumeUrl = (fileUrl) => {
+    if (!fileUrl) return '';
+    const normalized = String(fileUrl).replace(/\\/g, '/');
+    if (normalized.startsWith('http://') || normalized.startsWith('https://')) {
+      return normalized;
+    }
+    return `http://localhost:5001/${normalized.replace(/^\/+/g, '')}`;
+  };
+
   const updateCandidateInState = (userId, updater) => {
     setCandidates((prev) =>
       prev.map((candidate) => (candidate.userId === userId ? { ...candidate, ...updater(candidate) } : candidate))
@@ -236,7 +245,12 @@ function ManageCandidatesPage() {
                 <span className="mc-label">Resume:</span>
                 <span className="mc-value">
                   {selectedCandidate.resumeLink ? (
-                    <a href={selectedCandidate.resumeLink} target="_blank" rel="noreferrer" className="mc-resume-link">
+                    <a
+                      href={getResumeUrl(selectedCandidate.resumeLink)}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="mc-resume-link"
+                    >
                       View Resume
                     </a>
                   ) : (

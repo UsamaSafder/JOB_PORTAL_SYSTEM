@@ -595,6 +595,32 @@ const userController = {
     }
   },
 
+  // Get candidate resumes (authenticated)
+  getCandidateResumes: async (req, res) => {
+    try {
+      const candidate = await Candidate.findByUserId(req.user.id);
+      if (!candidate) return res.status(404).json({ error: 'Candidate profile not found' });
+
+      const resumes = [];
+      if (candidate.ResumeLink) {
+        // For now, return single resume as array. In future, can support multiple resumes
+        resumes.push({
+          id: 1, // Temporary ID for single resume
+          fileName: candidate.ResumeLink.split('/').pop() || 'resume.pdf',
+          fileUrl: candidate.ResumeLink,
+          fileSize: 0, // Size not stored, can be added later
+          uploadedAt: candidate.UpdatedAt || candidate.CreatedAt || new Date(),
+          isActive: true
+        });
+      }
+
+      res.json({ resumes });
+    } catch (error) {
+      console.error('Get candidate resumes error:', error);
+      res.status(500).json({ error: 'Failed to fetch resumes' });
+    }
+  },
+
   // Get system logs (Admin only)
   getSystemLogs: async (req, res) => {
     try {

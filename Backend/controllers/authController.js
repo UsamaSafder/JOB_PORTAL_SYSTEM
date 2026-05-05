@@ -50,7 +50,13 @@ exports.register = async (req, res) => {
         phone: phone,
         skills: skills || '',
         experienceYears: experienceYears || 0,
-        resumeLink: null
+        resumeLink: null, // Explicitly ensure no resume for new candidates
+        location: null,
+        education: null,
+        bio: null,
+        linkedinUrl: null,
+        portfolioUrl: null,
+        profilePicture: null
       };
 
       user = await Candidate.create(candidateData);
