@@ -18,7 +18,7 @@ A comprehensive job portal application built with modern web technologies, featu
 
 ### Frontend Options
 - **React** (Primary): Modern React 18 with Vite, React Router, Axios
-- **Angular** (Legacy): Traditional Angular application (src/app)
+
 
 ### Backend
 - **Node.js** with Express.js framework
