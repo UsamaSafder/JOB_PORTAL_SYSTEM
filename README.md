@@ -309,16 +309,6 @@ npm test
 - **File Upload Security** with type validation
 - **Role-based Access Control**
 
-## 📧 Email Configuration
-
-To enable email notifications, add to `Backend/.env`:
-
-```env
-# Email service (optional)
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
 ```
 
 ## 🧪 Testing
